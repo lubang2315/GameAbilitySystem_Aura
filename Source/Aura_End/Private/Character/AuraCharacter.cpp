@@ -7,6 +7,7 @@
 #include "Character/AuraPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Gas/Player/AuraPlayerState.h"
+#include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "UI/HUD/AuraHUDBase.h"
 
 AAuraCharacter::AAuraCharacter()
@@ -24,25 +25,6 @@ AAuraCharacter::AAuraCharacter()
 	bUseControllerRotationRoll = false;
 	
 }
-
-void AAuraCharacter::InitAbilityActorInfo()
-{
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-
-	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
-	AttributeSet = AuraPlayerState->GetAttributeSet();
-	AbilitySystemComponent->InitAbilityActorInfo(AuraPlayerState,this);
-    /**需要在这里进行激活HUD初始化相关，注意目前没有获得PC所以要先获得PC，获得PC不仅仅是为了传入值要想与HU通信也需要通过PC调用*/
-	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
-	{
-	    if (AAuraHUDBase* HUD = Cast<AAuraHUDBase>(AuraPlayerController->GetHUD()))
-	 {
-		HUD->InitOverlay(AuraPlayerController,AuraPlayerState,AbilitySystemComponent,AttributeSet);
-	 }
-	}
-}
-
 void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -54,5 +36,25 @@ void AAuraCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 	InitAbilityActorInfo();
 }
+void AAuraCharacter::InitAbilityActorInfo()
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState,this);
+	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
+	AttributeSet = AuraPlayerState->GetAttributeSet();
+	Cast<UAuraAbilitySystemComponent>(AuraPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
+
+    /**需要在这里进行激活HUD初始化相关，注意目前没有获得PC所以要先获得PC，获得PC不仅仅是为了传入值要想与HUD通信也需要通过PC调用*/
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+	    if (AAuraHUDBase* HUD = Cast<AAuraHUDBase>(AuraPlayerController->GetHUD()))
+	 {
+		HUD->InitOverlay(AuraPlayerController,AuraPlayerState,AbilitySystemComponent,AttributeSet);
+	 }
+	}
+}
+
+
 
 

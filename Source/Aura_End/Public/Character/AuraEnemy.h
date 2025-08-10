@@ -25,5 +25,6 @@ public:
 	/**敌人描边显示接口，来自于玩家控制器的光标事件*/
 	virtual void HighLightActor();
 	virtual void UnHighLightActor();
-	
+
+	virtual void InitAbilityActorInfo() override;
 };

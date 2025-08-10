@@ -8,6 +8,10 @@
 #include "GameFramework/Actor.h"
 #include "MyActor.generated.h"
 
+struct FActiveGameplayEffectHandle;
+class UAbilitySystemComponent;
+class UGameplayEffect;
+
 UENUM(BlueprintType)
 enum class EEffectApplicationPolicy : uint8
 {
@@ -15,6 +19,13 @@ enum class EEffectApplicationPolicy : uint8
 	ApplyOnEndOverlap,
 	DoNotApplyOnOverlap,
 	
+};
+
+UENUM()
+enum class EEffectRemovalPolicy
+{
+	RemoveOnEndOverlap,
+	DoNotRemove
 };
 
 UCLASS()
@@ -29,10 +40,44 @@ public:
 protected:
 	
 	virtual void BeginPlay() override;
+	
+	//给与目标添加GameplayEffect效果
+	UFUNCTION(BlueprintCallable) 
+	void ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> GameplayEffectClass);
 
-	UFUNCTION(BlueprintCallable)
-	void ApplyEffectTotarget(AActor* TargetActor,TSubclassOf<UGameplayEffect> GameplayEffect);
+	//在重叠开始时处理效果的添加删除逻辑
+	UFUNCTION(BlueprintCallable) 
+	void OnOverlap(AActor* TargetActor);
 
-    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Applied Effects")
-	TSubclassOf<UGameplayEffect> InstantiateGameplayEffectClass;
+	//在重叠结束时处理效果的添加删除逻辑
+	UFUNCTION(BlueprintCallable) 
+	void OnEndOverlap(AActor* TargetActor);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass; //生成GameplayEffect的类
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	EEffectApplicationPolicy InstantEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApplyOnOverlap;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	TSubclassOf<UGameplayEffect> DurationGameplayEffectClass; //生成具有一定持续时间的GameplayEffect的类
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	EEffectApplicationPolicy DurationEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApplyOnOverlap;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	TSubclassOf<UGameplayEffect> InfinityGameplayEffectClass; //生成具有一定持续时间的GameplayEffect的类
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	EEffectApplicationPolicy InfinityEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApplyOnOverlap;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	EEffectRemovalPolicy InfinityEffectRemovalPolicy = EEffectRemovalPolicy::RemoveOnEndOverlap;
+
+	//用于存储当前已经激活的GameplayEffect的句柄的map
+	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
+    /**曲线技能等级，按等级应用伤害*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="ActorLever")
+	float ActorLever = 1.f;
 };
+

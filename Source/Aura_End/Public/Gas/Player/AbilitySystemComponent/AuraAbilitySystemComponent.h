@@ -13,5 +13,11 @@ UCLASS()
 class AURA_END_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
-	
+
+public:
+	/**GE作用到Actor上时创建回调函数，用于广播*/
+	void AbilityActorInfoSet();
+
+protected:
+    void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle);
 };

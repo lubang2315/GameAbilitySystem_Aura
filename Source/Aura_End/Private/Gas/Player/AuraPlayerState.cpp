@@ -3,6 +3,7 @@
 
 #include "Gas/Player/AuraPlayerState.h"
 #include "AbilitySystemComponent.h"
+#include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
 
 AAuraPlayerState::AAuraPlayerState()
@@ -11,7 +12,7 @@ AAuraPlayerState::AAuraPlayerState()
 	NetUpdateFrequency = 100.f;
 
 	//加载能力系统在PlayerState基类里面
-	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
+	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 	//设置复制模式（能力系统信息复制到服务器信息规模）
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
