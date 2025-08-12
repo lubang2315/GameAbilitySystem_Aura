@@ -6,17 +6,15 @@
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 {
-	if (IsValid(this))
-	{OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UAuraAbilitySystemComponent::EffectApplied);}
-	else
-	{
-			GEngine->AddOnScreenDebugMessage(1,4,FColor::Red,FString("11111"));
-	}
-
+	
+	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UAuraAbilitySystemComponent::EffectApplied);
 }
 
 void UAuraAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
 	const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle)
 {
-	GEngine->AddOnScreenDebugMessage(1,4,FColor::Red,FString("Success"));
+    FGameplayTagContainer TagContainer;
+	SpecApplied.GetAllAssetTags(TagContainer);
+    /*广播Tag给widget*/
+	EffectAssetTag.Broadcast(TagContainer);
 }

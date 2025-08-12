@@ -2,6 +2,7 @@
 
 
 #include "UI/WidgetController/OverlayWidgetController.h"
+#include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
@@ -22,6 +23,22 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHpAttribute()).AddUObject(this,&UOverlayWidgetController::MaxHPChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddUObject(this,&UOverlayWidgetController::ManaChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddUObject(this,&UOverlayWidgetController::MaxManaChanged);
+
+	/*Tag广播 */
+	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTag.AddLambda([this](const FGameplayTagContainer& AssertTag)
+	{
+		for (const FGameplayTag& Tag : AssertTag)/*AssertTag是容器而Tag是里面的元素*/
+		{
+			
+			FGameplayTag MessageTag = FGameplayTag::RequestGameplayTag(FName("Message"));
+			if (Tag.MatchesTag(MessageTag))/*MatchTag匹配标签*/
+			{
+			    FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable,Tag);
+				MessageWidgetDelegate.Broadcast(*Row);
+			}
+		    
+		}
+	});
 }
 
 void UOverlayWidgetController::HPChanged(const FOnAttributeChangeData& Data)
