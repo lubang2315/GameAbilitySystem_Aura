@@ -53,35 +53,96 @@ public:
 	UAuraAttributeSet();
 	/**设置服务器属性值复制到客户端，用于预测系统，我们已经把过去值和限值提交给能力系统管理，当服务器收到改变值会验证有效性并同步其他客户端*/
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
-
-	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
-
-	static void SetEffectProperties(const FGameplayEffectModCallbackData& Data,FEffectPropreties& Props);
 	
-	/**创建HP，和Mana两个属性值*/
-	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_HP,Category = "Vital Attributes")
+    /**开始，夹值*/
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
+     /**结束，夹值*/
+	
+	static void SetEffectProperties(const FGameplayEffectModCallbackData& Data,FEffectPropreties& Props);
+
+	/*主要属性*/
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Strength,Category = "Vital Attributes")
+    FGameplayAttributeData Strength;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,Strength);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Intelligence,Category = "Vital Attributes")
+	FGameplayAttributeData Intelligence;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,Intelligence);
+	
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Resilience,Category = "Vital Attributes")
+	FGameplayAttributeData Resilience;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,Resilience);
+	
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Vigor,Category = "Vital Attributes")
+	FGameplayAttributeData Vigor;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,Vigor);
+	
+	/*次级属性*/
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_HP/*回调函数*/,Category = "Vital Attributes")
 	FGameplayAttributeData HP;
-	/**属性访问器，使用这个继承的宏可以快速设置初值和在蓝图端访问属性*/
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,HP);
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,HP);/*在宏中注册属性，这样你就可以直接使用初始化，取值，设置值。同时属性系统可以感知记录*/
 
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_MaxHP,Category = "Vital Attributes")
 	FGameplayAttributeData MaxHp;
-	/**属性访问器，使用这个继承的宏可以快速设置初值和在蓝图端访问属性*/
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,MaxHp);
 
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Mana,Category = "Vital Attributes")
 	FGameplayAttributeData Mana;
-	/**属性访问器，使用这个继承的宏可以快速设置初值和在蓝图端访问属性*/
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,Mana);
 
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_MaxMana,Category = "Vital Attributes")
 	FGameplayAttributeData MaxMana;
-	/**属性访问器，使用这个继承的宏可以快速设置初值和在蓝图端访问属性*/
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,MaxMana);
 
-	/**GAS预测系统，需要记录回滚值，以下用来记录旧值*/
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Armor,Category = "Vital Attributes")
+	FGameplayAttributeData Armor;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,Armor);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_ArmorPenetratinon,Category = "Vital Attributes")
+	FGameplayAttributeData ArmorPenetratinon;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,ArmorPenetratinon);
+	
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_blockChance,Category = "Vital Attributes")
+	FGameplayAttributeData blockChance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,blockChance);
+	
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_CriticalHitChance,Category = "Vital Attributes")
+	FGameplayAttributeData CriticalHitChance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,CriticalHitChance);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_CriticalHitDamage,Category = "Vital Attributes")
+	FGameplayAttributeData CriticalHitDamage;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,CriticalHitDamage);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_CriticalHitResistance,Category = "Vital Attributes")
+	FGameplayAttributeData CriticalHitResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,CriticalHitResistance);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_HealthRegeration,Category = "Vital Attributes")
+	FGameplayAttributeData HealthRegeration;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,HealthRegeration);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_ManaRegeration,Category = "Vital Attributes")
+	FGameplayAttributeData ManaRegeration;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,ManaRegeration);
+	
+
+	/**当接收到GetLifetimeReplicatedProps里面符合复制要求的打包好的数据，客户端接收数据后会触发回调函数就是以下函数。你可以做任何用途，在这里用作GAS预测系统，记录回滚值，以下用来记录旧值*/
+    /*主要属性*/
+	UFUNCTION()
+	void OnRep_Strength(const FGameplayAttributeData& OldStrength) const;
+
+	UFUNCTION()
+	void OnRep_Intelligence(const FGameplayAttributeData& OldIntelligence) const;
+
+	UFUNCTION()
+	void OnRep_Resilience(const FGameplayAttributeData& OldResilience) const;
+
+	UFUNCTION()
+	void OnRep_Vigor(const FGameplayAttributeData& OldVigor) const;
+	 
+	/*次级属性*/
 	UFUNCTION()
 	void OnRep_HP(const FGameplayAttributeData& OldHP) const;
 
@@ -93,4 +154,28 @@ public:
 
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
+
+	UFUNCTION()
+	void OnRep_Armor(const FGameplayAttributeData& OldArmor) const;
+
+	UFUNCTION()
+	void OnRep_ArmorPenetratinon(const FGameplayAttributeData& OldArmorPenetratinon) const;
+
+	UFUNCTION()
+	void OnRep_blockChance(const FGameplayAttributeData& OldblockChance) const;
+
+	UFUNCTION()
+	void OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const;
+ 
+    UFUNCTION()
+	void OnRep_CriticalHitDamage(const FGameplayAttributeData& OldCriticalHitDamage) const;
+
+    UFUNCTION()
+	void OnRep_CriticalHitResistance(const FGameplayAttributeData& OldCriticalHitResistance) const;
+
+    UFUNCTION()
+	void OnRep_HealthRegeration(const FGameplayAttributeData& OldHealthRegeration) const;
+
+    UFUNCTION()
+	void OnRep_ManaRegeration(const FGameplayAttributeData& OldManaRegeration) const;
 };

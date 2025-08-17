@@ -4,8 +4,6 @@
 #include "Actor/MyActor.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemInterface.h"
-#include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
 
 
 AMyActor::AMyActor()

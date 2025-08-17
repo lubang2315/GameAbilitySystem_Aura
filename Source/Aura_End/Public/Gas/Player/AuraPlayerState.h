@@ -21,11 +21,23 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;}
 
+	FORCEINLINE int32 GetPlayerLevel() const {return Level;}/*获取玩家等级*/
 protected:
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+	/**玩家属性等级*/
+	UPROPERTY(VisibleAnywhere,ReplicatedUsing = OnRepLevel);
+	int32 Level = 1;
+
+	UFUNCTION()
+	void OnRepLevel(int32 OldLevel);
+
+	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	
+	/**End 玩家属性等级*/
 };

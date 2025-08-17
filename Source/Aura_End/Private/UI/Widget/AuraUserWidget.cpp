@@ -2,6 +2,10 @@
 
 
 #include "UI/Widget/AuraUserWidget.h"
+#include "UI/HUD/AuraHUDBase.h"
+
+
+
 
 void UAuraUserWidget::SetWidgetController(UObject* InWidgetController)
 {

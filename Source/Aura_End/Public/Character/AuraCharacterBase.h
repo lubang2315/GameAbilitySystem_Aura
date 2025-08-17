@@ -5,14 +5,16 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "AttributeSet.h"
+#include "GameplayEffect.h"
 #include "GameFramework/Character.h"
+#include "Interface/CombotInterface.h"
 #include "AuraCharacterBase.generated.h"
 
 class AbilitySystemComponent;
 class AttributeSet;
 
 UCLASS(Abstract)
-class AURA_END_API AAuraCharacterBase : public ACharacter,public IAbilitySystemInterface
+class AURA_END_API AAuraCharacterBase : public ACharacter,public IAbilitySystemInterface,public ICombotInterface
 {
 	GENERATED_BODY()
 
@@ -38,4 +40,16 @@ protected:
 
 	virtual void InitAbilityActorInfo() ;
 
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Attributes")
+	TSubclassOf<UGameplayEffect> PrimaryAttribute;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Attributes")
+	TSubclassOf<UGameplayEffect> SecondaryAttribute;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Attributes")
+	TSubclassOf<UGameplayEffect> DefaultVitalAttribute;
+
+	void InitializePrimaryAttributes();/*利用GE初始化主要属性值*/
+
+	void ApplyEffectToTager(TSubclassOf<UGameplayEffect> GameplayEffectClass,float Lever) const;/*利用GE初始化主要属性值*/
 };

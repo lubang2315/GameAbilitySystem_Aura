@@ -3,6 +3,8 @@
 
 #include "Character/AuraCharacterBase.h"
 
+#include "AbilitySystemComponent.h"
+
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -32,6 +34,25 @@ void AAuraCharacterBase::BeginPlay()
 
 void AAuraCharacterBase::InitAbilityActorInfo()
 {
+}
+
+void AAuraCharacterBase::InitializePrimaryAttributes()
+{
+	ApplyEffectToTager(PrimaryAttribute,1.f);
+	ApplyEffectToTager(SecondaryAttribute,1.f);
+	ApplyEffectToTager(DefaultVitalAttribute,1.f);
+}
+
+void AAuraCharacterBase::ApplyEffectToTager(TSubclassOf<UGameplayEffect> GameplayEffectClass,float Lever) const
+{
+	/*人物主要属性的值，采用GE模式赋值，以下是初始化主要属性值*/
+ 	check(AbilitySystemComponent);
+ 	check(PrimaryAttribute);
+ 	/*给人物应用GE*/
+ 	FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	ContextHandle.AddSourceObject(this);/*设置源对象是自己，以便在后续使用GE时可以直接从GE中获取作用目标*/
+ 	FGameplayEffectSpecHandle EffectSpec = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffectClass,Lever,ContextHandle);
+ 	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*EffectSpec.Data.Get(),GetAbilitySystemComponent());
 }
 
 

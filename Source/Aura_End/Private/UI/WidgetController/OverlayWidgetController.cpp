@@ -18,11 +18,11 @@ void UOverlayWidgetController::BroadcastInitialValues()
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
-
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHPAttribute()).AddUObject(this,&UOverlayWidgetController::HPChanged);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHpAttribute()).AddUObject(this,&UOverlayWidgetController::MaxHPChanged);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddUObject(this,&UOverlayWidgetController::ManaChanged);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddUObject(this,&UOverlayWidgetController::MaxManaChanged);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHPAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnHPChangedEvent.Broadcast(Data.NewValue);});
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHpAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxHPChangedEvent.Broadcast(Data.NewValue);});
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnManaChangedEvent.Broadcast(Data.NewValue);});
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxManaChangedEvent.Broadcast(Data.NewValue);});
 
 	/*Tag广播 */
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTag.AddLambda([this](const FGameplayTagContainer& AssertTag)
@@ -39,25 +39,5 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		    
 		}
 	});
-}
-
-void UOverlayWidgetController::HPChanged(const FOnAttributeChangeData& Data)
-{
-	OnHPChangedEvent.Broadcast(Data.NewValue);
-}
-
-void UOverlayWidgetController::MaxHPChanged(const FOnAttributeChangeData& Data)
-{
-	OnMaxHPChangedEvent.Broadcast(Data.NewValue);
-}
-
-void UOverlayWidgetController::ManaChanged(const FOnAttributeChangeData& Data)
-{
-	OnManaChangedEvent.Broadcast(Data.NewValue);
-}
-
-void UOverlayWidgetController::MaxManaChanged(const FOnAttributeChangeData& Data)
-{
-	OnMaxManaChangedEvent.Broadcast(Data.NewValue);
 }
 

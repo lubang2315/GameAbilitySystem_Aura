@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameplayEffect.h"
-#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "MyActor.generated.h"
 

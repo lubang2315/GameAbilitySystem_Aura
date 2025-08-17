@@ -9,12 +9,14 @@
 /**
  * 
  */
+
 UCLASS()
 class AURA_END_API UAuraUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
+	
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<UObject> WidgetController;
 
