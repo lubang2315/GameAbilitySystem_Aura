@@ -12,6 +12,9 @@
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
     GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
+
+DECLARE_DELEGATE_RetVal(FGameplayAttribute,FAttributeSignature);
+
 USTRUCT()
 struct FEffectPropreties
 {
@@ -60,6 +63,8 @@ public:
      /**结束，夹值*/
 	
 	static void SetEffectProperties(const FGameplayEffectModCallbackData& Data,FEffectPropreties& Props);
+	
+	TMap<FGameplayTag, FGameplayAttribute(*)()> TagsToAttributes;
 
 	/*主要属性*/
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Strength,Category = "Vital Attributes")
@@ -178,4 +183,6 @@ public:
 
     UFUNCTION()
 	void OnRep_ManaRegeration(const FGameplayAttributeData& OldManaRegeration) const;
+	
+	
 };

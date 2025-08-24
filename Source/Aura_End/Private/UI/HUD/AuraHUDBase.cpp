@@ -16,6 +16,20 @@ UOverlayWidgetController* AAuraHUDBase::GetOverlayWidgetController(const FWidget
 	}
 	return OverlayWidgetController;
 }
+
+UAttributeMenuWidgetController* AAuraHUDBase::GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams)
+{
+	if (MenuWidgetController == nullptr)
+	{
+		MenuWidgetController = NewObject<UAttributeMenuWidgetController>(this,MenuWidgetControllerClass);
+		MenuWidgetController->SetWidgetControllerParams(WCParams);
+		MenuWidgetController->BindCallbacksToDependencies();
+
+		return MenuWidgetController;
+	}
+	return MenuWidgetController;
+}
+
 /**注意此函数是初始化函数，在调用前需要确保各个值已经加载，要确保已经加载需要在人物那里进行激活*/
 void AAuraHUDBase::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)
 {

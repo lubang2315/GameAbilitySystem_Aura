@@ -6,12 +6,31 @@
 #include "GameplayEffectExtension.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "Tags/AuraGameplayTags.h"
 
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
 	InitHP(50.f);
 	InitMana(10.f);
+
+	const FMyGameplayTags& GameplayTags = FMyGameplayTags::Get();
+	//FAttributeSignature StrengthDelegate;
+	//StrengthDelegate.BindStatic(GetStrengthAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Strength,GetStrengthAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Intelligence,GetIntelligenceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Resilience,GetResilienceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Vigor,GetVigorAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondery_Armor,GetArmorAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondery_ArmorPenetration,GetArmorPenetratinonAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondery_BlockChance,GetblockChanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondery_CriticalHitChance,GetCriticalHitChanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondery_CritiaclHitDamage,GetCriticalHitDamageAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondery_CritialHitResistance,GetCriticalHitResistanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondery_HealthRegeneration,GetHealthRegerationAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondery_ManaRegeneration,GetManaRegerationAttribute);
+
+	
 }
 /**声明要复制到客户端的属性，以及复制条件*/
 void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
