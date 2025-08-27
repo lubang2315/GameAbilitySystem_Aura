@@ -10,7 +10,10 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Player/AbilitySystemComponent/AuraAttributeSet.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Player/AuraPlayerState.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Input/AuraInputComponent.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Input/AuraInputConfig.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Interface/EnemyInterface.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Tags/AuraGameplayTags.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/HUD/AuraHUDBase.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/Widget/AuraUserWidget.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/WidgetController/AuraWidgetController.cpp" charset="UTF-8" />
@@ -24,7 +27,10 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Player/AbilitySystemComponent/AuraAttributeSet.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Player/AuraPlayerState.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Input/AuraInputComponent.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Input/AuraInputConfig.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Interface/EnemyInterface.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Tags/AuraGameplayTags.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/UI/HUD/AuraHUDBase.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/UI/Widget/AuraUserWidget.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/UI/WidgetController/AuraWidgetController.h" charset="UTF-8" />

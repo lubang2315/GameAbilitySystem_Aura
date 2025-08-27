@@ -52,4 +52,10 @@ protected:
 	void InitializePrimaryAttributes();/*利用GE初始化主要属性值*/
 
 	void ApplyEffectToTager(TSubclassOf<UGameplayEffect> GameplayEffectClass,float Lever) const;/*利用GE初始化主要属性值*/
+
+	void  AddCharacterAbilities() const;
+
+private:
+	UPROPERTY(EditAnywhere,Category="Attributes")
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbility;
 };

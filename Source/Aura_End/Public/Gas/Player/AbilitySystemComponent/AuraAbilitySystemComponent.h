@@ -23,6 +23,13 @@ public:
 
 	EffectAssetTag EffectAssetTag;
 
+	/*添加能力，注意能力在添加后要使用还要激活 *ActivateGA**/
+	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
+
+	/*触发和结束两种状态下，激活GA和移除GA(因为结束输入操作不一定GA结束，GA可能作用更长时间，所以这里只做通知) *ActivateGA**/
+	void AbilityInputTagHold(const FGameplayTag GameplayTag);
+	void AbilityAssetTagReleased(const FGameplayTag GameplayTag);
+
 protected:
     void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle);
 };

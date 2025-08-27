@@ -4,6 +4,7 @@
 #include "Character/AuraCharacterBase.h"
 
 #include "AbilitySystemComponent.h"
+#include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -53,6 +54,15 @@ void AAuraCharacterBase::ApplyEffectToTager(TSubclassOf<UGameplayEffect> Gamepla
 	ContextHandle.AddSourceObject(this);/*设置源对象是自己，以便在后续使用GE时可以直接从GE中获取作用目标*/
  	FGameplayEffectSpecHandle EffectSpec = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffectClass,Lever,ContextHandle);
  	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*EffectSpec.Data.Get(),GetAbilitySystemComponent());
+}
+
+void AAuraCharacterBase::AddCharacterAbilities() const
+{
+	UAuraAbilitySystemComponent* AuraASC = CastChecked<UAuraAbilitySystemComponent>(GetAbilitySystemComponent());
+
+	if (!HasAuthority()) return;
+
+	AuraASC->AddCharacterAbilities(StartupAbility);
 }
 
 

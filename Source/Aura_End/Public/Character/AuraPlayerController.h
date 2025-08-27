@@ -3,16 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputAction.h"
-#include "UObject/ObjectMacros.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/PlayerController.h"
+#include "Input/AuraInputConfig.h"
 #include "AuraPlayerController.generated.h"
 
+
+class UAuraAbilitySystemComponent;
+class UInputAction;
+class UInputMappingContext;
+class IEnemyInterface;
+struct FInputActionValue;
 /**
  * 
  */
-class UInputMappingContext;
-class IEnemyInterface;
+
 
 UCLASS()
 class AURA_END_API AAuraPlayerController : public APlayerController
@@ -42,4 +47,19 @@ private:
 	void CursorTrace();
 	TScriptInterface<IEnemyInterface> LastActor;
 	TScriptInterface<IEnemyInterface> ThisActor;
+
+	/**回调函数，根据状态触发GA *ActivateGA*/
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
+	void AbilityInputTagHold(FGameplayTag InputTag);
+
+	UPROPERTY(EditAnywhere, Category="Input")
+	TObjectPtr<UAuraInputConfig> AuraInputConfig;
+
+	/*获取ASC，然后用来调用里面的激活GA函数*/
+	UPROPERTY()
+	TObjectPtr<UAuraAbilitySystemComponent> AuraASC;
+
+	UAuraAbilitySystemComponent* GetASC();
+	
 };
