@@ -5,13 +5,18 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Input/AuraInputComponent.h"
 #include "Interface/EnemyInterface.h"
+#include "Tags/AuraGameplayTags.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+    
+	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -55,12 +60,32 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 	CursorTrace();
+	/**MouseMove*/
+	AutoMove();
+}
+
+void AAuraPlayerController::AutoMove()
+{
+	if(!bAutoRunning) return;
+	if (APawn* AuraPawn = GetPawn())
+	{
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(AuraPawn->GetActorLocation(),ESplineCoordinateSpace::World);
+		const FVector DirectOnSpline = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline,ESplineCoordinateSpace::World);
+		AuraPawn->AddMovementInput(DirectOnSpline);
+		
+		const float DistanceToDestination = (LocationOnSpline-CachedDestination).Length();
+		if (DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+		}
+	}
+	
 }
 
 //通过cursor光标重叠，高亮显示敌人
 void AAuraPlayerController::CursorTrace()
 {
-	FHitResult HitResult;
+	
 	GetHitResultUnderCursor(ECC_Visibility, false, HitResult); 
 	if (!HitResult.bBlockingHit) return;
 	
@@ -68,48 +93,97 @@ void AAuraPlayerController::CursorTrace()
 	//ThisActor = Cast<IEnemyInterface>(HitResult.GetActor());
 	ThisActor = HitResult.GetActor();
 //以下是几种情况
-	if(LastActor == nullptr)
+	if (LastActor != ThisActor)
 	{
-		if(ThisActor != nullptr)
+		if (LastActor) {LastActor->UnHighLightActor();}
+		if (ThisActor) {ThisActor->HighLightActor();}
+	}
+}
+
+void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)/*按下*/
+{
+	//GEngine->AddOnScreenDebugMessage(1,2,FColor::Red,*InputTag.ToString());
+	if (InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
+	{
+	    bTargeting = ThisActor != nullptr;
+		bAutoRunning = false;
+		FollowTime = 0.f;
+	}
+
+	
+}
+
+void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)/*释放*/
+{
+	if(!InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
+	{
+		/*我们通过ASC里面的函数激活GA所以要先获取ASC，但是不能确定是否为空指针，所以先检查*/
+		if (GetASC())
 		{
-			
-			ThisActor->HighLightActor();
+			AuraASC->AbilityAssetTagReleased(InputTag);
+		}
+		return;
+	}
+	if (bTargeting)
+	{
+		if (GetASC())
+		{
+			AuraASC->AbilityAssetTagReleased(InputTag);
 		}
 	}
 	else
 	{
-		if(ThisActor == nullptr)
+		APawn* ControllerPawn = GetPawn();
+		if (FollowTime <= shortpressThreshold)
 		{
-			LastActor->UnHighLightActor();
-		}
-		else
-		{
-			if(LastActor != ThisActor)
+			/*虚幻引擎内置自动寻路避障插件，返回路径*/
+			if (UNavigationPath* NavPat = UNavigationSystemV1::FindPathToLocationSynchronously(this,ControllerPawn->GetActorLocation(),CachedDestination))
 			{
-				
-				LastActor->UnHighLightActor();
-				ThisActor->HighLightActor();
-			} 
+				Spline->ClearSplinePoints();
+				for (const FVector& PathPoint : NavPat->PathPoints)
+				{
+					Spline->AddSplinePoint(PathPoint,ESplineCoordinateSpace::World);
+					DrawDebugSphere(GetWorld(),PathPoint,10,10,FColor::White,false,5.f);
+				}
+				CachedDestination = NavPat->PathPoints[NavPat->PathPoints.Num()-1];/*把导航点减1是为了解决有的地方被遮挡无法到达导致人物无限移动*/
+			    bAutoRunning = true;
+			}
 		}
 	}
 }
 
-void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
+void AAuraPlayerController::AbilityInputTagHold(FGameplayTag InputTag)/*长按*/
 {
-	//GEngine->AddOnScreenDebugMessage(1,2,FColor::Red,*InputTag.ToString());
-}
 
-void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
-{
-	/*我们通过ASC里面的函数激活GA所以要先获取ASC，但是不能确定是否为空指针，所以先检查*/
-	if (GetASC() == nullptr) return;
-	AuraASC->AbilityAssetTagReleased(InputTag);
-}
-
-void AAuraPlayerController::AbilityInputTagHold(FGameplayTag InputTag)
-{
-	if (GetASC() == nullptr) return;
-	AuraASC->AbilityInputTagHold(InputTag);
+	if (!InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
+	{
+		if (GetASC())
+		{
+			AuraASC->AbilityInputTagHold(InputTag);
+		}
+		return;
+	}
+	if (bTargeting)
+	{
+		if (GetASC())
+		{
+			AuraASC->AbilityAssetTagReleased(InputTag);
+		}
+	}
+	else
+	{
+	    FollowTime += GetWorld()->GetDeltaSeconds();
+    	if (HitResult.bBlockingHit)
+    	{
+    		CachedDestination = HitResult.ImpactPoint;
+    	}
+    	if (APawn* ControlledPawn = GetPawn())
+    	{
+    		const FVector WordDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+            ControlledPawn->AddMovementInput(WordDirection);
+    	}	
+	}
+	
 }
 
 UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
@@ -120,6 +194,8 @@ UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 	}
 	return AuraASC;
 }
+
+
 
 void AAuraPlayerController::Move(const struct FInputActionValue& InputActionValue)
 {

@@ -10,7 +10,7 @@
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 {
 	
-	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UAuraAbilitySystemComponent::EffectApplied);
+	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UAuraAbilitySystemComponent::ClientEffectApplied);
     /*测试代码已废弃*/
 	/*const FMyGameplayTags& MyGameplayTags = FMyGameplayTags::Get();
 	GEngine->AddOnScreenDebugMessage(
@@ -68,7 +68,7 @@ void UAuraAbilitySystemComponent::AbilityAssetTagReleased(const FGameplayTag Gam
 	}
 }
 
-void UAuraAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
+void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent,
                                                 const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle)
 {
     FGameplayTagContainer TagContainer;

@@ -31,5 +31,6 @@ public:
 	void AbilityAssetTagReleased(const FGameplayTag GameplayTag);
 
 protected:
-    void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle);
+	UFUNCTION(Client, reliable)
+    void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle);
 };

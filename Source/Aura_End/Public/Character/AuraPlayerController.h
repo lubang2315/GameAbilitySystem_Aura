@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Components/SplineComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Input/AuraInputConfig.h"
 #include "AuraPlayerController.generated.h"
@@ -48,7 +49,7 @@ private:
 	TScriptInterface<IEnemyInterface> LastActor;
 	TScriptInterface<IEnemyInterface> ThisActor;
 
-	/**回调函数，根据状态触发GA *ActivateGA*/
+	/**回调函数，根据状态触发GA *ActivateGA**MouseMove*/
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	void AbilityInputTagHold(FGameplayTag InputTag);
@@ -61,5 +62,24 @@ private:
 	TObjectPtr<UAuraAbilitySystemComponent> AuraASC;
 
 	UAuraAbilitySystemComponent* GetASC();
-	
+
+	/**鼠标点击移动 *MouseMove*/
+	FVector CachedDestination = FVector::ZeroVector;
+	float FollowTime = 0.f;
+	bool bAutoRunning = false;
+	bool bTargeting = false;
+
+	UPROPERTY(EditDefaultsOnly)
+	float shortpressThreshold = 0.3f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float AutoRunAcceptanceRadius = 50.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<USplineComponent> Spline;
+
+	void AutoMove();
+
+	FHitResult HitResult;
+	/*End*/
 };
