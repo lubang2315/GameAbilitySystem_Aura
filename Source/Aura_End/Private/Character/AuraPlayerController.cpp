@@ -51,6 +51,9 @@ void AAuraPlayerController::SetupInputComponent()
     UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
 	//给增强输入绑定一个回调函数Move，当MoverAction有值时就会激发回调函数（ETriggerEvent::Triggered此参数是触发方式）
 	AuraInputComponent->BindAction(MoveAction,ETriggerEvent::Triggered,this,&AAuraPlayerController::Move);
+	/*Bind Shift Activate Firebolt*/
+	AuraInputComponent->BindAction(ShiftAction,ETriggerEvent::Started,this,&AAuraPlayerController::ShiftPressed);
+	AuraInputComponent->BindAction(ShiftAction,ETriggerEvent::Completed,this,&AAuraPlayerController::ShiftReleased);
     /*绑定自定义回调函数，当有输入操作触发回调函数 *ActivateGA**/
 	AuraInputComponent->BindAbilityAction(AuraInputConfig,this,&ThisClass::AbilityInputTagPressed,&ThisClass::AbilityInputTagReleased,&ThisClass::AbilityInputTagHold);
 	
@@ -118,37 +121,34 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)/*释�
 	if(!InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
 	{
 		/*我们通过ASC里面的函数激活GA所以要先获取ASC，但是不能确定是否为空指针，所以先检查*/
-		if (GetASC())
-		{
-			AuraASC->AbilityAssetTagReleased(InputTag);
-		}
+		if (GetASC()) GetASC()->AbilityAssetTagReleased(InputTag);
 		return;
 	}
-	if (bTargeting)
+	if (GetASC()) GetASC()->AbilityAssetTagReleased(InputTag);
+	if (!bTargeting && !bShiftKeyDown)
 	{
-		if (GetASC())
-		{
-			AuraASC->AbilityAssetTagReleased(InputTag);
-		}
-	}
-	else
-	{
-		APawn* ControllerPawn = GetPawn();
-		if (FollowTime <= shortpressThreshold)
-		{
-			/*虚幻引擎内置自动寻路避障插件，返回路径*/
-			if (UNavigationPath* NavPat = UNavigationSystemV1::FindPathToLocationSynchronously(this,ControllerPawn->GetActorLocation(),CachedDestination))
-			{
-				Spline->ClearSplinePoints();
-				for (const FVector& PathPoint : NavPat->PathPoints)
-				{
-					Spline->AddSplinePoint(PathPoint,ESplineCoordinateSpace::World);
-					DrawDebugSphere(GetWorld(),PathPoint,10,10,FColor::White,false,5.f);
-				}
-				CachedDestination = NavPat->PathPoints[NavPat->PathPoints.Num()-1];/*把导航点减1是为了解决有的地方被遮挡无法到达导致人物无限移动*/
-			    bAutoRunning = true;
-			}
-		}
+		const APawn* ControllerPawn = GetPawn();
+        		if (FollowTime <= shortpressThreshold && ControllerPawn)
+        		{
+        			/*虚幻引擎内置自动寻路避障插件，返回路径*/
+        			if (UNavigationPath* NavPat = UNavigationSystemV1::FindPathToLocationSynchronously(this,ControllerPawn->GetActorLocation(),CachedDestination))
+        			{
+        				Spline->ClearSplinePoints();
+        				for (const FVector& PathPoint : NavPat->PathPoints)
+        				{
+        					Spline->AddSplinePoint(PathPoint,ESplineCoordinateSpace::World);
+        					DrawDebugSphere(GetWorld(),PathPoint,10,10,FColor::White,false,5.f);
+        				}
+        				if (NavPat->PathPoints.Num() > 0)
+        				{
+        					CachedDestination = NavPat->PathPoints[NavPat->PathPoints.Num()-1];/*把导航点减1是为了解决有的地方被遮挡无法到达导致人物无限移动*/
+                            bAutoRunning = true;
+        				}
+        				FollowTime = 0.f;
+        				bTargeting = false;
+        			}
+		
+        		}
 	}
 }
 
@@ -157,26 +157,20 @@ void AAuraPlayerController::AbilityInputTagHold(FGameplayTag InputTag)/*长按*/
 
 	if (!InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
 	{
-		if (GetASC())
-		{
-			AuraASC->AbilityInputTagHold(InputTag);
-		}
+		if (GetASC()) GetASC()->AbilityInputTagHold(InputTag);
 		return;
 	}
-	if (bTargeting)
+	if (bTargeting || bShiftKeyDown)
 	{
-		if (GetASC())
-		{
-			AuraASC->AbilityAssetTagReleased(InputTag);
-		}
+		if (GetASC()) GetASC()->AbilityInputTagHold(InputTag);
+		GEngine->AddOnScreenDebugMessage(1, 1, FColor::Black, FString::Printf(TEXT("bShiftKeyDown: %s"), bShiftKeyDown ? TEXT("True") : TEXT("False")));
 	}
 	else
 	{
 	    FollowTime += GetWorld()->GetDeltaSeconds();
     	if (HitResult.bBlockingHit)
-    	{
     		CachedDestination = HitResult.ImpactPoint;
-    	}
+    	
     	if (APawn* ControlledPawn = GetPawn())
     	{
     		const FVector WordDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();

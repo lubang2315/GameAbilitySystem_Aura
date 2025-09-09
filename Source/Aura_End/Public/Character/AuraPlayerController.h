@@ -42,6 +42,13 @@ private:
 	
 	UPROPERTY(EditAnywhere,Category="Input")
     TObjectPtr<UInputAction> MoveAction;
+    /*Shift Activate FireBolt*/
+	UPROPERTY(EditAnywhere,Category="Input")
+	TObjectPtr<UInputAction> ShiftAction;
+
+	void ShiftPressed() {bShiftKeyDown = true;};
+	void ShiftReleased() {bShiftKeyDown = false;};
+	bool bShiftKeyDown = false;
 
 	void Move(const struct FInputActionValue& InputActionValue);
 
@@ -62,6 +69,7 @@ private:
 	TObjectPtr<UAuraAbilitySystemComponent> AuraASC;
 
 	UAuraAbilitySystemComponent* GetASC();
+	
 
 	/**鼠标点击移动 *MouseMove*/
 	FVector CachedDestination = FVector::ZeroVector;

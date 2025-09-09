@@ -32,6 +32,13 @@ protected:
 	UPROPERTY(EditAnywhere,Category="Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
+	/*法杖火球插槽*/
+	UPROPERTY(EditAnywhere,Category="Combat")
+	FName WeaponTipSocketName;
+
+	virtual FVector GetCombatSocketLocation() override;
+    /*End*/
+	
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
@@ -54,6 +61,10 @@ protected:
 	void ApplyEffectToTager(TSubclassOf<UGameplayEffect> GameplayEffectClass,float Lever) const;/*利用GE初始化主要属性值*/
 
 	void  AddCharacterAbilities() const;
+
+
+
+	
 
 private:
 	UPROPERTY(EditAnywhere,Category="Attributes")

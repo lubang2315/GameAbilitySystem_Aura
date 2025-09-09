@@ -1,0 +1,48 @@
+// 由来时路褒贬不一制作
+
+
+#include "Gas/Ability/AuraProjectileSpell.h"
+
+#include "Actor/Auraprojectile.h"
+#include "Interface/CombotInterface.h"
+
+void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                           const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+                                           const FGameplayEventData* TriggerEventData)
+{
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+}
+
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+{   /*判断此函数是否在服务器运行*/
+	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority();
+	if (!bIsServer) return;
+
+	
+	if (ICombotInterface* CombotInterface = Cast<ICombotInterface>(GetAvatarActorFromActorInfo()))
+	{
+        const FVector SocketLocation = CombotInterface->GetCombatSocketLocation();
+		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
+		Rotation.Pitch = 0.f;
+	
+		
+		FTransform SpawnTransform;
+		SpawnTransform.SetLocation(SocketLocation);
+        SpawnTransform.SetRotation(Rotation.Quaternion());
+      
+		
+		AAuraprojectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraprojectile>(
+			ProjectileSpellClass,
+			SpawnTransform,
+			GetOwningActorFromActorInfo(),
+			Cast<APawn>(GetAvatarActorFromActorInfo()),
+				ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+        Projectile->FinishSpawning(SpawnTransform);
+        /*TODO：没有做火球伤害*/
+	}
+}
+
+
+
+
