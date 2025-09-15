@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Character/AuraCharacterBase.h"
+#include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Interface/EnemyInterface.h"
+#include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
 
+class UWidgetComponent;
 /**
  * 
  */
@@ -28,8 +31,21 @@ public:
 
 	virtual void InitAbilityActorInfo() override;
 
-	UPROPERTY(visibleAnywhere,BlueprintReadOnly,Category="Character Class Default");
+	virtual void InitializePrimaryAttributes() const override;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
 	int32 Level = 1;
+    /*设置敌人属性*/
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
+	ECharacterClass CharacterClass = ECharacterClass::Warrior;
 
 	virtual int32 GetPlayerLevel() override;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Widget")
+	TObjectPtr<UWidgetComponent> HPWidget;
+
+	UPROPERTY(BlueprintAssignable,Category="GAS|AttributSet")
+	FOnAttributeChangedSignature OnEnemyHPChangedEvent;
+
+	UPROPERTY(BlueprintAssignable,Category="GAS|AttributSet")
+	FOnAttributeChangedSignature OnEnemyMaxHPChangedEvent;
 };

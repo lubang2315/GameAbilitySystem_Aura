@@ -78,6 +78,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 	if (Data.EvaluatedData.Attribute == GetHPAttribute())
 	{
 		SetHP(FMath::Clamp(GetHP(),0.f,GetMaxHp()));
+	    UE_LOG(LogTemp,Warning,TEXT("TargetActor:%s,DamageValue:%f"),*Props.TargetActor->GetName(),GetHP());
 	}
 	if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{

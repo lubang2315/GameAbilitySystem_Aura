@@ -2,6 +2,7 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Aura_End.Build.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Actor/Auraprojectile.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Actor/MyActor.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Character/AuraCharacter.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Character/AuraCharacterBase.cpp" charset="UTF-8" />
@@ -10,6 +11,9 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Character/AuraPlayerController.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Ability/AuraProjectileSpell.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/AbilityTasks/TargetDataUnderMouse.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/DataAsset/AttributeInfo.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/DataAsset/CharacterClassInfo.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/FunctionLibrary/MyFunctionLibrary.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Player/AbilitySystemComponent/AuraAttributeSet.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Player/AuraPlayerState.cpp" charset="UTF-8" />
@@ -22,6 +26,7 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/Widget/AuraUserWidget.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/WidgetController/AuraWidgetController.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/WidgetController/OverlayWidgetController.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Actor/Auraprojectile.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Actor/MyActor.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Character/AuraCharacter.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Character/AuraCharacterBase.h" charset="UTF-8" />
@@ -30,6 +35,9 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Character/AuraPlayerController.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Ability/AuraProjectileSpell.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/AbilityTasks/TargetDataUnderMouse.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/DataAsset/AttributeInfo.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/DataAsset/CharacterClassInfo.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/FunctionLibrary/MyFunctionLibrary.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Player/AbilitySystemComponent/AuraAttributeSet.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Player/AuraPlayerState.h" charset="UTF-8" />

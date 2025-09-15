@@ -3,6 +3,8 @@
 
 #include "Gas/Ability/AuraProjectileSpell.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "Actor/Auraprojectile.h"
 #include "Interface/CombotInterface.h"
 
@@ -38,8 +40,14 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 			GetOwningActorFromActorInfo(),
 			Cast<APawn>(GetAvatarActorFromActorInfo()),
 				ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+		        UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
+        		FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass,GetAbilityLevel(),SourceASC->MakeEffectContext());
+        		Projectile->DamageEffectHandle = SpecHandle;
+		
         Projectile->FinishSpawning(SpawnTransform);
-        /*TODO：没有做火球伤害*/
+
+		
 	}
 }
 

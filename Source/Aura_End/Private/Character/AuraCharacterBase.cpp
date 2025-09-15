@@ -4,6 +4,7 @@
 #include "Character/AuraCharacterBase.h"
 
 #include "AbilitySystemComponent.h"
+#include "Aura_End/Aura_End.h"
 #include "Components/CapsuleComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 
@@ -21,7 +22,11 @@ AAuraCharacterBase::AAuraCharacterBase()
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera,ECR_Ignore);
-	GetMesh()->SetCollisionResponseToChannel(ECC_Camera,ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Projectile,ECR_Overlap);
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
+	//GetMesh()->SetCollisionResponseToChannel(ECC_Camera,ECR_Ignore);
+	//GetMesh()->SetCollisionResponseToChannel(ECC_Projectile,ECR_Overlap);
+	//GetMesh()->SetGenerateOverlapEvents(true);
 }
 
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
@@ -46,7 +51,7 @@ void AAuraCharacterBase::InitAbilityActorInfo()
 {
 }
 
-void AAuraCharacterBase::InitializePrimaryAttributes()
+void AAuraCharacterBase::InitializePrimaryAttributes() const
 {
 	ApplyEffectToTager(PrimaryAttribute,1.f);
 	ApplyEffectToTager(SecondaryAttribute,1.f);
