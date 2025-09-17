@@ -32,6 +32,20 @@ public:
 	virtual void InitAbilityActorInfo() override;
 
 	virtual void InitializePrimaryAttributes() const override;
+
+	virtual void Die() override;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Combat")
+	float LifeSpan = 5.f;
+
+	UPROPERTY(BlueprintReadOnly,Category = "Combot")
+	bool bHitReacting = false;
+
+	UPROPERTY(BlueprintReadOnly,Category = "Combot")
+	float BaseWalkSpeed = 250.f;
+	
+    void HitReactTagChanged(const FGameplayTag CallBackTag,int32 NewCount);
+	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
 	int32 Level = 1;
     /*设置敌人属性*/

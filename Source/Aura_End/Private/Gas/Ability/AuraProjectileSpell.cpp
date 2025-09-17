@@ -6,6 +6,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Actor/Auraprojectile.h"
+#include "Tags/AuraGameplayTags.h"
 #include "Interface/CombotInterface.h"
 
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -43,6 +44,14 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 
 		        UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
         		FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass,GetAbilityLevel(),SourceASC->MakeEffectContext());
+
+		        /*按调用者设置伤害该功能可以传入动态可变伤害*/
+		        const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
+				GEngine->AddOnScreenDebugMessage(1,1,FColor::Red,FString::Printf(TEXT("Damage: %f"),ScaledDamage));
+		
+		        const FMyGameplayTags GameplayTags = FMyGameplayTags::Get();
+		        UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,GameplayTags.Damage,ScaledDamage);
+		
         		Projectile->DamageEffectHandle = SpecHandle;
 		
         Projectile->FinishSpawning(SpawnTransform);

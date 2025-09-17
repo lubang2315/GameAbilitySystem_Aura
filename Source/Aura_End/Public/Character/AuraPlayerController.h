@@ -10,6 +10,7 @@
 #include "AuraPlayerController.generated.h"
 
 
+class UDamageTextComponent;
 class UAuraAbilitySystemComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -28,12 +29,19 @@ class AURA_END_API AAuraPlayerController : public APlayerController
 public:
 	//设置人物控制复制到服务器
 	AAuraPlayerController();
+
+	/*在控制器端显示损伤敌人数值*/
+	UFUNCTION(Client, Reliable)
+	void ShowDamageNumber(float DamageAmount,ACharacter* TargerCharacter);
 	
 protected:
 	
     virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual  void PlayerTick(float DeltaTime) override;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
 	
 private:
 

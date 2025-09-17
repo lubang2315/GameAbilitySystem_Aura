@@ -3,9 +3,11 @@
 #include "AbilitySystemComponent.h"
 #include "Aura_End/Aura_End.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
+#include "Tags/AuraGameplayTags.h"
 #include "UI/Widget/AuraUserWidget.h"
 
 
@@ -27,6 +29,8 @@ void AAuraEnemy::BeginPlay()
 {
     Super::BeginPlay();
     InitAbilityActorInfo();
+    /*初始化角色技能*/
+    UMyFunctionLibrary::GiveStartupAbilities(this,AbilitySystemComponent);
 }
 
 void AAuraEnemy::HighLightActor()
@@ -60,8 +64,23 @@ void AAuraEnemy::InitAbilityActorInfo()
    if ( AuraAttributes)
    {
        /*广播Enemy的血条*/
-       AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributes->GetHPAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnEnemyHPChangedEvent.Broadcast(Data.NewValue);});
-       AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributes->GetMaxHpAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnEnemyMaxHPChangedEvent.Broadcast(Data.NewValue);});
+       AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate
+       (AuraAttributes->GetHPAttribute()).AddLambda
+       ([this](const FOnAttributeChangeData& Data)
+       {
+           OnEnemyHPChangedEvent.Broadcast(Data.NewValue);
+       });
+       
+       AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate
+       (AuraAttributes->GetMaxHpAttribute()).AddLambda
+       ([this](const FOnAttributeChangeData& Data)
+       {
+           OnEnemyMaxHPChangedEvent.Broadcast(Data.NewValue);
+       });
+
+       AbilitySystemComponent->RegisterGameplayTagEvent
+       (FMyGameplayTags::Get().Effects_HitReact,EGameplayTagEventType::NewOrRemoved).AddUObject
+       (this,&AAuraEnemy::HitReactTagChanged);
    }
     /*在广播HP变化前进行初始化*/
     OnEnemyHPChangedEvent.Broadcast(AuraAttributes->GetHP());
@@ -71,6 +90,18 @@ void AAuraEnemy::InitAbilityActorInfo()
 void AAuraEnemy::InitializePrimaryAttributes() const
 {
    UMyFunctionLibrary::InitializeDefaultAttribute(Level,CharacterClass,AbilitySystemComponent,this);
+}
+
+void AAuraEnemy::Die()
+{
+    SetLifeSpan(LifeSpan);
+    Super::Die();
+}
+
+void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallBackTag, int32 NewCount)
+{
+    bHitReacting = NewCount > 0;
+    GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0 : BaseWalkSpeed;
 }
 
 int32 AAuraEnemy::GetPlayerLevel()

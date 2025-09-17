@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystemComponent.h"
 #include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MyFunctionLibrary.generated.h"
@@ -27,5 +26,7 @@ public:
 
 	UFUNCTION(BlueprintCallable,Category = "FunctionLibrary|CharacterClassInfo")
 	static void InitializeDefaultAttribute(float Lever,ECharacterClass CharacterClass,UAbilitySystemComponent* EnemyASC,const UObject* WordContextObject);
-	
+
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
+	static void GiveStartupAbilities(const UObject* WordContextObject,UAbilitySystemComponent* EnemyASC);
 };

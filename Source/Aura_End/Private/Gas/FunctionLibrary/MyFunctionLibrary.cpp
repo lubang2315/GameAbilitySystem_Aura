@@ -47,8 +47,6 @@ UAttributeMenuWidgetController* UMyFunctionLibrary::GetAttributeMenuWidgetContro
 void UMyFunctionLibrary::InitializeDefaultAttribute(float Lever, ECharacterClass CharacterClass,
 	UAbilitySystemComponent* EnemyASC, const UObject* WordContextObject)
 {
-	GEngine->AddOnScreenDebugMessage(1,1,FColor::Black,FString::Printf(TEXT("HelloWord12")));
-	
 	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WordContextObject));
 	if (GameMode == nullptr) return;
 
@@ -76,4 +74,17 @@ void UMyFunctionLibrary::InitializeDefaultAttribute(float Lever, ECharacterClass
 
 	GEngine->AddOnScreenDebugMessage(1,1,FColor::Black,FString::Printf(TEXT("HelloWord")));
 	
+}
+
+void UMyFunctionLibrary::GiveStartupAbilities(const UObject* WordContextObject, UAbilitySystemComponent* EnemyASC)
+{
+	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WordContextObject));
+	if (GameMode == nullptr) return;
+
+	UCharacterClassInfo* CharacterClassInfo = GameMode->CharacterClassInfo;/*从关卡中获取自己创建的数据资产，这是一种新的方式，以我现在的理解都是cast的*/
+	for (const TSubclassOf<UGameplayAbility> AbilityClass : CharacterClassInfo->CommitAbilities)
+	{
+		FGameplayAbilitySpec GASpec = FGameplayAbilitySpec(AbilityClass,1);
+		EnemyASC->GiveAbility(GASpec);
+	}
 }

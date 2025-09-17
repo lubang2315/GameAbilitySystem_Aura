@@ -43,6 +43,11 @@ public:
 	FGameplayTag InputTag_Passive_1;
 	FGameplayTag InputTag_Passive_2;
 
+	/*GE里面有个按调用者计算伤害，在这里创建标签来当Key应用伤害*/
+	FGameplayTag Damage;
+
+	/*Enemy受击通知标签*/
+	FGameplayTag Effects_HitReact;
 private:
 	static FMyGameplayTags GameplayTags;
  

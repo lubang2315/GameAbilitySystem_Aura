@@ -34,6 +34,40 @@ UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+UAnimMontage* AAuraCharacterBase::GetAnimMontage_Implementation()
+{
+	return HitReactMontage;
+}
+
+void AAuraCharacterBase::Die()
+{
+	/*敌人死亡设置武器脱手*/
+	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	MultCastHandleDeath();
+}
+
+void AAuraCharacterBase::MultCastHandleDeath_Implementation()
+{
+	/*开启武器物理效果*/
+	Weapon->SetSimulatePhysics(true);
+	Weapon->SetEnableGravity(true);
+	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+
+	/*开启角色物理效果*/
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetEnableGravity(true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic,ECR_Block);
+
+	/*关闭角色碰撞体碰撞通道，避免死亡尸体影响*/
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	/*调用死亡溶解*/
+	Dissolve();
+	
+	
+}
+
 // Called when the game starts or when spawned
 void AAuraCharacterBase::BeginPlay()
 {
@@ -77,6 +111,24 @@ void AAuraCharacterBase::AddCharacterAbilities() const
 	if (!HasAuthority()) return;
 
 	AuraASC->AddCharacterAbilities(StartupAbility);
+}
+
+void AAuraCharacterBase::Dissolve()
+{
+	GEngine->AddOnScreenDebugMessage(0,2,FColor::Blue,FString::Printf(TEXT("555555")));
+	if (IsValid(DissolveMaterialInstance))
+	{
+		UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(DissolveMaterialInstance,this);
+		GetMesh()->SetMaterial(0, DynamicMaterial);
+	    StartDissolveTimeline(DynamicMaterial);
+	}
+	if (IsValid(DissolveWeaponMaterialInstance))
+	{
+		UMaterialInstanceDynamic* DynamicWeaponMaterial = UMaterialInstanceDynamic::Create(DissolveWeaponMaterialInstance,this);
+		Weapon->SetMaterial(0,DynamicWeaponMaterial);
+		WeaponStartDissolveTimeline(DynamicWeaponMaterial);
+	}
+	
 }
 
 

@@ -8,6 +8,7 @@
 #include "GameplayEffect.h"
 #include "GameFramework/Character.h"
 #include "Interface/CombotInterface.h"
+#include "Interface/CombotInterface.h"
 #include "AuraCharacterBase.generated.h"
 
 class AbilitySystemComponent;
@@ -23,7 +24,13 @@ public:
 	AAuraCharacterBase();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;}
+	
+	virtual UAnimMontage* GetAnimMontage_Implementation() override;
 
+	virtual void Die() override;
+
+	UFUNCTION(NetMulticast,Reliable)
+	virtual void MultCastHandleDeath();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -62,9 +69,25 @@ protected:
 
 	void  AddCharacterAbilities() const;
 
+	UPROPERTY(EditAnywhere,Category="Combot")
+	TObjectPtr<UAnimMontage> HitReactMontage;
 
+	/*溶解效果*/
 
-	
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	TObjectPtr<UMaterialInstance> DissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	TObjectPtr<UMaterialInstance> DissolveWeaponMaterialInstance;
+
+	void Dissolve();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartDissolveTimeline(const UMaterialInstanceDynamic* DynamicMaterialInstance);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void WeaponStartDissolveTimeline(const UMaterialInstanceDynamic* DynamicMaterialInstance);
+	/*End*/
 
 private:
 	UPROPERTY(EditAnywhere,Category="Attributes")

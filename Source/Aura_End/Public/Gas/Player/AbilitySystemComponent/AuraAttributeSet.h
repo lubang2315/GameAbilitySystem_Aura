@@ -82,6 +82,11 @@ public:
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Vigor,Category = "Vital Attributes")
 	FGameplayAttributeData Vigor;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,Vigor);
+
+	/*元属性*/
+	UPROPERTY(BlueprintReadOnly,Category = "Meta Attributes")
+	FGameplayAttributeData IncomingDamage;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,IncomingDamage);
 	
 	/*次级属性*/
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_HP/*回调函数*/,Category = "Vital Attributes")
@@ -184,5 +189,6 @@ public:
     UFUNCTION()
 	void OnRep_ManaRegeration(const FGameplayAttributeData& OldManaRegeration) const;
 	
-	
+private:
+	void ShowFloatingText(const FEffectPropreties& Props,float DamageValue);
 };

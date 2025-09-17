@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "CombotInterface.generated.h"
 
+class UAnimMontage;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI,BlueprintType)
 class UCombotInterface : public UInterface
@@ -30,5 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent)
 	void PassTargetDataVector(const FVector& Vector);
 
-
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	UAnimMontage* GetAnimMontage();
+	
+	virtual void Die() = 0;
+	
 };

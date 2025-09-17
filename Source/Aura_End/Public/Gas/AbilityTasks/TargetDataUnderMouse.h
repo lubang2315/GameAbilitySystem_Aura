@@ -12,7 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMouseTargetDataSignature,const FGam
  * 
  */
 UCLASS()
-class AURA_END_API UTargetDataUnderMouse : public UAbilityTask,public ICombotInterface
+class AURA_END_API UTargetDataUnderMouse : public UAbilityTask//public ICombotInterface
 {
 	GENERATED_BODY()
 

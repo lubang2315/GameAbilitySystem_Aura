@@ -4,7 +4,10 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Engine/Engine.h"
 #include "GameplayEffectExtension.h"
+#include "Character/AuraPlayerController.h"
 #include "GameFramework/Character.h"
+#include "Interface/CombotInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Tags/AuraGameplayTags.h"
 
@@ -63,6 +66,7 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	if (Attribute == GetHPAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f,GetMaxHp());
+		////////////////////////////////////////////////////////
 		UE_LOG(LogTemp,Warning,TEXT("HP:%f"),NewValue);
 		
 	}
@@ -84,7 +88,44 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 	{
 		SetMana(FMath::Clamp(GetMana(),0.f,GetMaxMana()));
 	}
+	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	{
+		const float LocalValue = GetIncomingDamage();
+		SetIncomingDamage(0.f);
 
+		if (LocalValue > 0.f)
+		{
+			const float NewHP = GetHP() - LocalValue;
+			SetHP(FMath::Clamp(NewHP,0.f,GetMaxHp()));
+			const bool IsDead = NewHP <=0;
+			if (IsDead)
+			{
+				ICombotInterface* CombotInterface = Cast<ICombotInterface>(Props.TargetActor);
+				if (CombotInterface)
+				{
+					CombotInterface->Die();
+				}
+			}
+			else
+			{
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FMyGameplayTags::Get().Effects_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);/*按标签激活技能*/
+			}
+			ShowFloatingText(Props,LocalValue);
+		}
+	}
+
+}
+
+void UAuraAttributeSet::ShowFloatingText(const FEffectPropreties& Props, float DamageValue)
+{
+	if (Props.SourceActor != Props.TargetActor)
+	{
+		AAuraPlayerController* AuraPC = Cast<AAuraPlayerController>(UGameplayStatics::GetPlayerController(Props.TargetActor,0));
+		AuraPC->ShowDamageNumber(DamageValue,Props.TargetCharacter);
+	}
+	
 }
 
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectPropreties& Props)
@@ -199,3 +240,5 @@ void UAuraAttributeSet::OnRep_ManaRegeration(const FGameplayAttributeData& OldMa
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet,ManaRegeration,OldManaRegeration);
 }
+
+

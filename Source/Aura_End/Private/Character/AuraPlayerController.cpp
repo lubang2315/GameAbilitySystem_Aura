@@ -11,12 +11,26 @@
 #include "Input/AuraInputComponent.h"
 #include "Interface/EnemyInterface.h"
 #include "Tags/AuraGameplayTags.h"
+#include "GameFramework/Character.h"
+#include "UI/Widget/DamageTextComponent.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
     
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
+}
+
+void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargerCharacter)
+{
+	if (IsValid(TargerCharacter) && DamageAmount)
+	{
+		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargerCharacter, DamageTextComponentClass);
+		DamageText->RegisterComponent();
+		DamageText->AttachToComponent(TargerCharacter->GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
+		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		DamageText->SetDamageText(DamageAmount);
+	}
 }
 
 void AAuraPlayerController::BeginPlay()
