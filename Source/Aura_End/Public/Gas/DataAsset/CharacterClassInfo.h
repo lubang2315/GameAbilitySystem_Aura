@@ -47,5 +47,8 @@ public:
 	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass);
 
 	UPROPERTY(EditDefaultsOnly,Category = "Commit Class Defaults")
-	TArray<TSubclassOf<UGameplayAbility>> CommitAbilities; 
+	TArray<TSubclassOf<UGameplayAbility>> CommitAbilities;
+
+	UPROPERTY(EditDefaultsOnly,Category = "Commit Class Defaults|Damage")
+	TObjectPtr<UCurveTable> DamageCulationCoefficicients;
 };

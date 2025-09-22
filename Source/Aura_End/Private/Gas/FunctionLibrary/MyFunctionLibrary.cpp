@@ -80,11 +80,20 @@ void UMyFunctionLibrary::GiveStartupAbilities(const UObject* WordContextObject, 
 {
 	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WordContextObject));
 	if (GameMode == nullptr) return;
-
+	
 	UCharacterClassInfo* CharacterClassInfo = GameMode->CharacterClassInfo;/*从关卡中获取自己创建的数据资产，这是一种新的方式，以我现在的理解都是cast的*/
 	for (const TSubclassOf<UGameplayAbility> AbilityClass : CharacterClassInfo->CommitAbilities)
 	{
 		FGameplayAbilitySpec GASpec = FGameplayAbilitySpec(AbilityClass,1);
 		EnemyASC->GiveAbility(GASpec);
 	}
+}
+
+UCharacterClassInfo* UMyFunctionLibrary::GetCharacterClassInfo(const UObject* WorldContextObject)
+{
+	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if (GameMode == nullptr) return nullptr;
+
+	return GameMode->CharacterClassInfo;/*从关卡中获取自己创建的数据资产，这是一种新的方式，以我现在的理解都是cast的*/
+	
 }

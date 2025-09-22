@@ -10,6 +10,7 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Character/AuraGameModeBase.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Character/AuraPlayerController.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Ability/AuraProjectileSpell.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Ability/ExecCalc/ExecCalc_Damage.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/AbilityTasks/TargetDataUnderMouse.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/DataAsset/AttributeInfo.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/DataAsset/CharacterClassInfo.cpp" charset="UTF-8" />
@@ -35,6 +36,7 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Character/AuraGameModeBase.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Character/AuraPlayerController.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Ability/AuraProjectileSpell.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Ability/ExecCalc/ExecCalc_Damage.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/AbilityTasks/TargetDataUnderMouse.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/DataAsset/AttributeInfo.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/DataAsset/CharacterClassInfo.h" charset="UTF-8" />

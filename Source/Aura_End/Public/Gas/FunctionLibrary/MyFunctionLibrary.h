@@ -29,4 +29,7 @@ public:
 
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
 	static void GiveStartupAbilities(const UObject* WordContextObject,UAbilitySystemComponent* EnemyASC);
+
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
+	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
 };
