@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffectTypes.h"
 #include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MyFunctionLibrary.generated.h"
@@ -32,4 +33,23 @@ public:
 
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+
+	/*通过自定义的FAuraGameplayEffectContext（注文件夹名AuraAbilityTypes）传递是否暴击和格挡*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static bool IsBlockHit(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static bool IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetIsBlockHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,bool IsBlockHit);
+
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetIsCriticalHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,bool IsCriticalHitHit);
+	/*End*/
+
 };
+
+
+
+

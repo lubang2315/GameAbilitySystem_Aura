@@ -20,6 +20,13 @@ struct SDamageStruct
 	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitChance);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitDamage);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitResistance);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(FireResistance);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(LightningResistance);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(ArcaneResistance);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(PhysicalResistance);
+
+	/*创建一个Map，通过标签映射捕获的属性*/
+	TMap<FGameplayTag,FGameplayEffectAttributeCaptureDefinition> TagstoCaptureDefs;
 	
 	SDamageStruct()
 	{
@@ -31,11 +38,30 @@ struct SDamageStruct
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,CriticalHitChance,Source,false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,CriticalHitDamage,Source,false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,CriticalHitResistance,Target,false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,FireResistance,Target,false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,LightningResistance,Target,false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,ArcaneResistance,Target,false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,PhysicalResistance,Target,false);
+
+		
+		/*Add映射*/
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_Armor,ArmorDef);
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_ArmorPenetration,ArmorPenetratinonDef);
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_BlockChance,blockChanceDef);
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CriticalHitChance,CriticalHitChanceDef);
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CritiaclHitDamage,CriticalHitDamageDef);
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CritialHitResistance,CriticalHitResistanceDef);
+		
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Fire,FireResistanceDef);
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Lightning,LightningResistanceDef);
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Arcane,ArcaneResistanceDef);
+		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Physical,PhysicalResistanceDef);
 	}
 };
 
 static const SDamageStruct& DamageStruct()
 {
+	/*把结构体变成静态的*/
 	static SDamageStruct DStruct;
 	return DStruct;
 }
@@ -43,6 +69,8 @@ static const SDamageStruct& DamageStruct()
 
 UExecCalc_Damage::UExecCalc_Damage()
 {
+	
+	
 	/*3*初始化时告诉GAS系统要捕获的属性*/
 	RelevantAttributesToCapture.Add(DamageStruct().ArmorDef);
 	RelevantAttributesToCapture.Add(DamageStruct().ArmorPenetratinonDef);
@@ -50,6 +78,13 @@ UExecCalc_Damage::UExecCalc_Damage()
 	RelevantAttributesToCapture.Add(DamageStruct().CriticalHitChanceDef);
 	RelevantAttributesToCapture.Add(DamageStruct().CriticalHitDamageDef);
 	RelevantAttributesToCapture.Add(DamageStruct().CriticalHitResistanceDef);
+	RelevantAttributesToCapture.Add(DamageStruct().FireResistanceDef);
+	RelevantAttributesToCapture.Add(DamageStruct().LightningResistanceDef);
+	RelevantAttributesToCapture.Add(DamageStruct().ArcaneResistanceDef);
+	RelevantAttributesToCapture.Add(DamageStruct().PhysicalResistanceDef);
+
+	
+	
 }
 
 void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
@@ -129,16 +164,42 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	/*自定义计算属性区域*/
 	/*护甲属性计算*/
 	const float EffectiveArmor = blockChance*(100.f - ArmorPenetratinon*ArmorPenetrationCoefficient)/100.f;
-	float Damage = Spec.GetSetByCallerMagnitude(FMyGameplayTags::Get().Damage);
+
+
+	float Damage = 0.f;
+	for (auto& pair : FMyGameplayTags::Get().DamageTypesToResistance)
+	{
+
+		const FGameplayTag ResistanceTag = pair.Value;
+		FGameplayEffectAttributeCaptureDefinition CaptureDefinition = SDamageStruct().TagstoCaptureDefs[ResistanceTag];
+
+		float DamageTypeValue = Spec.GetSetByCallerMagnitude(pair.Key);
+
+		float ResistanceValue = 0.f;
+		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition,EvaluateParam,ResistanceValue);
+		ResistanceValue = FMath::Clamp(ResistanceValue,0.f,100.f);
+		
+		DamageTypeValue *= (100.f - ResistanceValue)/100.f;
+		Damage += DamageTypeValue;
+	}
+	
+	
 	Damage *= (100.f - EffectiveArmor*EffectiveArmorCoefficient)/100.f;
 	
-	int32 IsBlockDamage = FMath::RandRange(0,100);
-	Damage = blockChance>=IsBlockDamage ? Damage*0.5f : Damage;
+	const bool IsBlockDamage = FMath::RandRange(0,100) <= blockChance;
+
+	/*！通过自定义的函数传递是否阻挡攻击*/
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+	UMyFunctionLibrary::SetIsBlockHit( EffectContextHandle,IsBlockDamage);
+	Damage = IsBlockDamage ? Damage*0.5f : Damage;
+	
 	/*暴击属性计算*/
 	const float CriticalHitResistanceValue = CriticalHitChance - CriticalHitResistance*CriticalHitResistanceCoefficient;
 	const bool IsCriticalHit = FMath::RandRange(0,100) < CriticalHitResistanceValue;
 
-	if (IsCriticalHit) Damage = Damage*2.f + CriticalHitDamage;
+	/*！同样的通过自定义的函数传递是否阻暴击*/
+	UMyFunctionLibrary::SetIsCriticalHit(EffectContextHandle,IsCriticalHit);
+	Damage = IsCriticalHit ? Damage*2.f + CriticalHitDamage : Damage;
 	
 	/*End自定义计算区域*/
 	

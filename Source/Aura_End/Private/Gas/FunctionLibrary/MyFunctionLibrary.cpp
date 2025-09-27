@@ -3,6 +3,7 @@
 
 #include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 
+#include "AuraAbilityTypes.h"
 #include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Character/AuraGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -97,3 +98,37 @@ UCharacterClassInfo* UMyFunctionLibrary::GetCharacterClassInfo(const UObject* Wo
 	return GameMode->CharacterClassInfo;/*从关卡中获取自己创建的数据资产，这是一种新的方式，以我现在的理解都是cast的*/
 	
 }
+
+bool UMyFunctionLibrary::IsBlockHit(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* AuraGameplayEffectContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  AuraGameplayEffectContext->IsblockedHit();
+	}
+	return false;
+}	
+
+bool UMyFunctionLibrary::IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* AuraGameplayEffectContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  AuraGameplayEffectContext->IsCriticalHit();
+	}
+	return false;
+}
+
+inline void UMyFunctionLibrary::SetIsBlockHit(FGameplayEffectContextHandle& EffectContextHandle, bool IsBlockHit)
+{
+	
+	FAuraGameplayEffectContext* AuraGameplayEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
+	AuraGameplayEffectContext->SetBlockedHit(IsBlockHit);
+	
+}
+
+inline void UMyFunctionLibrary::SetIsCriticalHit(FGameplayEffectContextHandle& EffectContextHandle,bool IsCriticalHitHit)
+ {
+ 
+ 	FAuraGameplayEffectContext* AuraGameplayEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
+ 	AuraGameplayEffectContext->SetCriticalHit(IsCriticalHitHit);
+ 	
+ }

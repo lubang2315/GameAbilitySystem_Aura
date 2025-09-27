@@ -45,9 +45,27 @@ public:
 
 	/*GE里面有个按调用者计算伤害，在这里创建标签来当Key应用伤害*/
 	FGameplayTag Damage;
+	FGameplayTag Damage_Fire;
+	FGameplayTag Damage_Lightning;
+	FGameplayTag Damage_Arcane;
+	FGameplayTag Damage_Physical;
 
+	/*上面创建了Key，在计算伤害的时候还有属性抗性予以减免，这里我创建几个相应的属性减免标签*/
+	FGameplayTag Attributes_Resistance_Fire;
+	FGameplayTag Attributes_Resistance_Lightning;
+	FGameplayTag Attributes_Resistance_Arcane;
+	FGameplayTag Attributes_Resistance_Physical;
+	
+	/*这里创建了一个数组，在设置完有调用者计算伤害时，存在多种属性传递，接收者是按照标签接受属性值，
+	 * 以前的方法是一个个找到标签在读取属性值，这样比较麻烦，这里直接创建一个数组，把要读取的属性
+	 * 类型值标签都加到一个数组里面然后遍历一下。后面又优化了因为还要读取属性抗性减免以后的伤害所
+	 * 以这里不在使用数组而是Map映射，在这里方便学习把源代码留在注释中TArray<FGameplayTag> DamageTypes;
+	 */
+	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistance;
+	
 	/*Enemy受击通知标签*/
 	FGameplayTag Effects_HitReact;
+	
 private:
 	static FMyGameplayTags GameplayTags;
  

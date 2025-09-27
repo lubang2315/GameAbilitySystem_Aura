@@ -12,8 +12,9 @@ void UOverlayWidgetController::BroadcastInitialValues()
 	OnMaxHPChangedEvent.Broadcast(AuraAttributeSet->GetMaxHp());
 	OnManaChangedEvent.Broadcast(AuraAttributeSet->GetMana());
 	OnMaxManaChangedEvent.Broadcast(AuraAttributeSet->GetMaxMana());
-
+	
 }
+
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
@@ -23,6 +24,8 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHpAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxHPChangedEvent.Broadcast(Data.NewValue);});
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnManaChangedEvent.Broadcast(Data.NewValue);});
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxManaChangedEvent.Broadcast(Data.NewValue);});
+
+	
 
 	/*Tag广播 */
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTag.AddLambda([this](const FGameplayTagContainer& AssertTag)

@@ -136,6 +136,24 @@ public:
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_ManaRegeration,Category = "Vital Attributes")
 	FGameplayAttributeData ManaRegeration;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,ManaRegeration);
+
+	
+	/*Resistance Damage Types Attributes*/
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_FireResistance,Category = "Resistance Damage Types Attributes")
+	FGameplayAttributeData FireResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,FireResistance);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_LightningResistance,Category = "Resistance Damage Types Attributes")
+	FGameplayAttributeData LightningResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,LightningResistance);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_ArcaneResistance,Category = "Resistance Damage Types Attributes")
+	FGameplayAttributeData ArcaneResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,ArcaneResistance);
+
+	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_PhysicalResistance,Category = "Resistance Damage Types Attributes")
+	FGameplayAttributeData PhysicalResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,PhysicalResistance);
 	
 
 	/**当接收到GetLifetimeReplicatedProps里面符合复制要求的打包好的数据，客户端接收数据后会触发回调函数就是以下函数。你可以做任何用途，在这里用作GAS预测系统，记录回滚值，以下用来记录旧值*/
@@ -188,7 +206,23 @@ public:
 
     UFUNCTION()
 	void OnRep_ManaRegeration(const FGameplayAttributeData& OldManaRegeration) const;
+
+
+	/*Resistance Damage Types Attributes*/
+	UFUNCTION()
+	void OnRep_FireResistance(const FGameplayAttributeData& OldFireResistance) const;
+
+	UFUNCTION()
+	void OnRep_LightningResistance(const FGameplayAttributeData& OldLightningResistance) const;
+
+	UFUNCTION()
+	void OnRep_ArcaneResistance(const FGameplayAttributeData& OldArcaneResistance) const;
+
+	UFUNCTION()
+	void OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const;
 	
 private:
-	void ShowFloatingText(const FEffectPropreties& Props,float DamageValue);
+	void ShowFloatingText(const FEffectPropreties& Props,float DamageValue,bool IsBlockHit,bool IsCriticalHit);
 };
+
+

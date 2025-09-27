@@ -8,7 +8,6 @@
 #include "GameplayEffect.h"
 #include "GameFramework/Character.h"
 #include "Interface/CombotInterface.h"
-#include "Interface/CombotInterface.h"
 #include "AuraCharacterBase.generated.h"
 
 class AbilitySystemComponent;

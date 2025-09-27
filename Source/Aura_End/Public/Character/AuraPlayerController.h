@@ -32,7 +32,7 @@ public:
 
 	/*在控制器端显示损伤敌人数值*/
 	UFUNCTION(Client, Reliable)
-	void ShowDamageNumber(float DamageAmount,ACharacter* TargerCharacter);
+	void ShowDamageNumber(float DamageAmount,ACharacter* TargerCharacter,bool IsBlockHit,bool IsCriticalHit);
 	
 protected:
 	
