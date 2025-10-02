@@ -31,6 +31,9 @@ void AMyActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEff
 	}
 	 */
 
+	/*敌人有的时候不需要吸收道具，所以这里检测到敌人判断一下是否直接驳回*/
+	if (!bApplyEffectToEnemies && TargetActor->ActorHasTag("Enemy")) return;
+
 	//获取ASC
 	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 	if(TargetASC == nullptr) return;
@@ -52,20 +55,26 @@ void AMyActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEff
 	{
 		ActiveEffectHandles.Add(ActiveGameplayEffectHandle, TargetASC);
 	}
+	else if(bDestoryOnEffectApplication)
+	{
+		Destroy();
+	}
 }
 
 void AMyActor::OnOverlap(AActor* TargetActor)
 {
+
+	/*敌人有的时候不需要吸收道具，所以这里检测到敌人判断一下是否直接驳回*/
+	if (!bApplyEffectToEnemies && TargetActor->ActorHasTag("Enemy")) return;
+	
 	if(InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
 	{
 		ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
-		Destroy();
 	}
 
 	if(DurationEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
 	{
 		ApplyEffectToTarget(TargetActor, DurationGameplayEffectClass);
-		Destroy();
 	}
 
 	if(InfinityEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
@@ -76,6 +85,10 @@ void AMyActor::OnOverlap(AActor* TargetActor)
 
 void AMyActor::OnEndOverlap(AActor* TargetActor)
 {
+
+	/*敌人有的时候不需要吸收道具，所以这里检测到敌人判断一下是否直接驳回*/
+	if (!bApplyEffectToEnemies && TargetActor->ActorHasTag("Enemy")) return;
+	
 	//添加效果
 	if(InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
 	{

@@ -1,7 +1,10 @@
 // 由来时路褒贬不一制作
 #include "Character/AuraEnemy.h"
+
 #include "AbilitySystemComponent.h"
 #include "Aura_End/Aura_End.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Gas/FunctionLibrary/MyFunctionLibrary.h"
@@ -23,6 +26,13 @@ AAuraEnemy::AAuraEnemy()
 
     HPWidget = CreateDefaultSubobject<UWidgetComponent>("Widget");
     HPWidget->SetupAttachment(GetRootComponent());
+
+    /*设置敌人在被AIController控制追踪玩家时转向更线性，在蓝图可以设置但这里在代码里面写死，以免错误*/
+    bUseControllerRotationPitch = false;
+    bUseControllerRotationYaw = false;
+    bUseControllerRotationRoll = false;
+
+    GetCharacterMovement()->bUseControllerDesiredRotation = true;
 }
 
 void AAuraEnemy::BeginPlay()
@@ -35,6 +45,21 @@ void AAuraEnemy::BeginPlay()
          UMyFunctionLibrary::GiveStartupAbilities(this,AbilitySystemComponent);
     }
    
+}
+
+void AAuraEnemy::PossessedBy(AController* NewController)
+{
+    Super::PossessedBy(NewController);
+
+    AuraAIController = Cast<AAuraAIController>(NewController);
+    /*把行为树和黑板绑定*/
+    AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+    /*运行行为树*/
+    AuraAIController->RunBehaviorTree(BehaviorTree);
+    /*设置是否击中敌人为否*/
+    AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),false);
+    /*告诉黑板是不是远程攻击类型敌人*/
+    AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"),CharacterClass != ECharacterClass::Warrior);
 }
 
 void AAuraEnemy::HighLightActor()
@@ -126,6 +151,8 @@ void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallBackTag, int32 NewCou
 {
     bHitReacting = NewCount > 0;
     GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0 : BaseWalkSpeed;
+    /*设置是否击中敌人为否*/
+    AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);
 }
 
 int32 AAuraEnemy::GetPlayerLevel()

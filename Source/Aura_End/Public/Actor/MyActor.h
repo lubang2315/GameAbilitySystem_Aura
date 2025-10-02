@@ -78,5 +78,11 @@ protected:
     /**曲线技能等级，按等级应用伤害*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="ActorLever")
 	float ActorLever = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	bool bApplyEffectToEnemies = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Apply Effects")
+	bool bDestoryOnEffectApplication = false;
 };
 

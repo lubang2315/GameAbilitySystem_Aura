@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AI/AuraAIController.h"
 #include "Character/AuraCharacterBase.h"
 #include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Interface/EnemyInterface.h"
@@ -24,6 +25,7 @@ public:
 	AAuraEnemy();
 
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
 
 	/**敌人描边显示接口，来自于玩家控制器的光标事件*/
 	virtual void HighLightActor();
@@ -62,4 +64,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable,Category="GAS|AttributSet")
 	FOnAttributeChangedSignature OnEnemyMaxHPChangedEvent;
+
+protected:
+	UPROPERTY(EditAnywhere,Category="AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+
+	UPROPERTY()
+	TObjectPtr<AAuraAIController> AuraAIController;
 };

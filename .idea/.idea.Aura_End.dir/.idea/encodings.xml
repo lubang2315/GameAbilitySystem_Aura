@@ -2,6 +2,9 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Aura_End.Build.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/AI/AuraAIController.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/AI/BTService_FindNearestPlayer.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/AI/BTTask_Attack.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Actor/Auraprojectile.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Actor/MyActor.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Character/AuraCharacter.cpp" charset="UTF-8" />
@@ -30,6 +33,9 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/Widget/DamageTextComponent.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/WidgetController/AuraWidgetController.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/WidgetController/OverlayWidgetController.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/AI/AuraAIController.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/AI/BTService_FindNearestPlayer.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/AI/BTTask_Attack.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Actor/Auraprojectile.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Actor/MyActor.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Character/AuraCharacter.h" charset="UTF-8" />
