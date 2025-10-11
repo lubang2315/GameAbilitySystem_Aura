@@ -139,12 +139,20 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 
 void UAuraAttributeSet::ShowFloatingText(const FEffectPropreties& Props, float DamageValue,bool IsBlockHit,bool IsCriticalHit)
 {
+	
 	if (Props.SourceCharacter != Props.TargetCharacter)
 	{
-		AAuraPlayerController* AuraPC = Cast<AAuraPlayerController>(Props.SourceCharacter->Controller);
-		AuraPC->ShowDamageNumber(DamageValue,Props.TargetCharacter,IsBlockHit,IsCriticalHit);
+		/*攻击发起者是玩家*/ 
+		if (AAuraPlayerController* AuraPC = Cast<AAuraPlayerController>(Props.SourceCharacter->Controller))
+		{
+			AuraPC->ShowDamageNumber(DamageValue,Props.TargetCharacter,IsBlockHit,IsCriticalHit);
+		}
+		/*攻击发起者是敌人*/
+		if (AAuraPlayerController* AuraPC = Cast<AAuraPlayerController>(Props.TargetCharacter->Controller))
+		{
+			AuraPC->ShowDamageNumber(DamageValue,Props.TargetCharacter,IsBlockHit,IsCriticalHit);
+		}
 	}
-	
 }
 
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectPropreties& Props)

@@ -29,7 +29,7 @@ public:
 	static void InitializeDefaultAttribute(float Lever,ECharacterClass CharacterClass,UAbilitySystemComponent* EnemyASC,const UObject* WordContextObject);
 
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
-	static void GiveStartupAbilities(const UObject* WordContextObject,UAbilitySystemComponent* EnemyASC);
+	static void GiveStartupAbilities(const UObject* WordContextObject,UAbilitySystemComponent* EnemyASC,ECharacterClass CharacterClass);
 
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
@@ -47,7 +47,16 @@ public:
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
 	static void SetIsCriticalHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,bool IsCriticalHitHit);
 	/*End*/
+	
+	/*获取半径范围内的Actor*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
+	static void GetLivePlayersWithinRadius(const UObject* WorldContextObject,float Radius,TArray<AActor*>& OutOverlappingActors,TArray<AActor*>& ActorsToIgnore,const FVector& SphereOrigin);
 
+	/*在敌人使用技能攻击玩家时，通过标签判断是不是友军从而避免误伤*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
+	static bool ISNotFriend(AActor* FirstActor,AActor* SecondActor);
+	
+	
 };
 
 

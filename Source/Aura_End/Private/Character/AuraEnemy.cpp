@@ -42,7 +42,7 @@ void AAuraEnemy::BeginPlay()
     /*初始化角色技能*/
     if (HasAuthority())
     {
-         UMyFunctionLibrary::GiveStartupAbilities(this,AbilitySystemComponent);
+         UMyFunctionLibrary::GiveStartupAbilities(this,AbilitySystemComponent,CharacterClass);
     }
    
 }
@@ -54,6 +54,7 @@ void AAuraEnemy::PossessedBy(AController* NewController)
     AuraAIController = Cast<AAuraAIController>(NewController);
     /*把行为树和黑板绑定*/
     AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+    
     /*运行行为树*/
     AuraAIController->RunBehaviorTree(BehaviorTree);
     /*设置是否击中敌人为否*/
@@ -147,12 +148,25 @@ void AAuraEnemy::Die()
     Super::Die();
 }
 
+void AAuraEnemy::SetCombotTarget_Implementation(AActor* CombotTarget)
+{
+    CombotActor = CombotTarget;
+}
+
+AActor* AAuraEnemy::GetCombotTarget_Implementation()
+{
+    return CombotActor;
+}
+
 void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallBackTag, int32 NewCount)
 {
     bHitReacting = NewCount > 0;
     GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0 : BaseWalkSpeed;
     /*设置是否击中敌人为否*/
-    AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);
+    if (AuraAIController && AuraAIController->GetBlackboardComponent())
+    {
+        AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);
+    }
 }
 
 int32 AAuraEnemy::GetPlayerLevel()

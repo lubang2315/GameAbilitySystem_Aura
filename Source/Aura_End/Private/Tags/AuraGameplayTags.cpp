@@ -63,4 +63,12 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 	/*Enemy敌人受击通知标签*/
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Effects.HitReact"),FString("Enemy HitReact Tag"));
 
+	/*Enemy Attack tag*/
+	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"),FString("Enemy Attack Tag"));
+
+	/*Enemy蒙太奇攻击标签*/
+	GameplayTags.Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.Weapon"),FString("使用武器攻击蒙太奇标签"));
+	GameplayTags.Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.RightHand"),FString("右手攻击蒙太奇标签"));
+	GameplayTags.Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.LeftHand"),FString("左手攻击蒙太奇标签"));
+	
 }

@@ -65,6 +65,14 @@ public:
 	
 	/*Enemy受击通知标签*/
 	FGameplayTag Effects_HitReact;
+
+	/*Enemy Attrack tag*/
+	FGameplayTag Abilities_Attack;
+
+	/*Enemy蒙太奇攻击标签*/
+	FGameplayTag Montage_Attack_Weapon;
+	FGameplayTag Montage_Attack_RightHand;
+	FGameplayTag Montage_Attack_LeftHand;
 	
 private:
 	static FMyGameplayTags GameplayTags;

@@ -19,31 +19,48 @@ class AURA_END_API AAuraCharacterBase : public ACharacter,public IAbilitySystemI
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AAuraCharacterBase();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;}
-	
-	virtual UAnimMontage* GetAnimMontage_Implementation() override;
-
-	virtual void Die() override;
 
 	UFUNCTION(NetMulticast,Reliable)
 	virtual void MultCastHandleDeath();
+
+	/*IcombotInterface*/
+	
+	virtual UAnimMontage* GetAnimMontage_Implementation() override;
+	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag)const override;
+	virtual bool IsDead_Implementation() override;
+	virtual AActor* GetAvatar_Implementation() override;
+	virtual void Die() override;
+	
+	/*创建一个容器，方便敌人近战模版的泛用性，因为有拿武器和不拿武器的小兵，并且有左右手切换攻击的类型，保证泛用性，这里创建容器把标签和蒙太奇关联*/
+	UPROPERTY(EditAnywhere,Category="Combat")
+	TArray<FTaggedMontage> AttackMontage;
+	virtual TArray<FTaggedMontage> GetTaggedMontages_Implementation() override;
+
+	/*End*/
+
+	
+	
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	bool bDead = false;
 
 	//创建一个可以附着在骨骼网格体上的类
 	UPROPERTY(EditAnywhere,Category="Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
-	/*法杖火球插槽*/
+	/*武器插槽*/
 	UPROPERTY(EditAnywhere,Category="Combat")
 	FName WeaponTipSocketName;
 
-	virtual FVector GetCombatSocketLocation() override;
-    /*End*/
+	UPROPERTY(EditAnywhere,Category="Combat")
+	FName LeftHandSocketName;
+
+	UPROPERTY(EditAnywhere,Category="Combat")
+	FName RightHandSocketName;
 	
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;

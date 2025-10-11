@@ -22,4 +22,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combot")
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
 
+	UFUNCTION(BlueprintCallable)
+	void CauseDamage(AActor* TargetActor);
+
 };

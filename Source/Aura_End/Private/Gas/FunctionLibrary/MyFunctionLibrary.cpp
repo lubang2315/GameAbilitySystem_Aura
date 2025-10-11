@@ -6,6 +6,7 @@
 #include "AuraAbilityTypes.h"
 #include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Character/AuraGameModeBase.h"
+#include "Interface/CombotInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/HUD/AuraHUDBase.h"
 
@@ -77,15 +78,30 @@ void UMyFunctionLibrary::InitializeDefaultAttribute(float Lever, ECharacterClass
 	
 }
 
-void UMyFunctionLibrary::GiveStartupAbilities(const UObject* WordContextObject, UAbilitySystemComponent* EnemyASC)
+void UMyFunctionLibrary::GiveStartupAbilities(const UObject* WordContextObject, UAbilitySystemComponent* EnemyASC,ECharacterClass CharacterClass)
 {
 	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WordContextObject));
 	if (GameMode == nullptr) return;
 	
 	UCharacterClassInfo* CharacterClassInfo = GameMode->CharacterClassInfo;/*从关卡中获取自己创建的数据资产，这是一种新的方式，以我现在的理解都是cast的*/
+
+	/*应用Enemy共同能力*/
 	for (const TSubclassOf<UGameplayAbility> AbilityClass : CharacterClassInfo->CommitAbilities)
 	{
 		FGameplayAbilitySpec GASpec = FGameplayAbilitySpec(AbilityClass,1);
+		EnemyASC->GiveAbility(GASpec);
+	}
+
+	ICombotInterface* CombotInterface = Cast<ICombotInterface>(EnemyASC->GetAvatarActor());
+	int32 Lever = CombotInterface->GetPlayerLevel();
+
+	/*因为不同类型Enemy攻击技能不同所以与上述的共同能力区分，这里通过传入Enemy类型返回攻击技能*/
+	const FCharacterClassDefaultInfo ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
+
+	/*应用Enemy攻击技能*/
+	for (const TSubclassOf<UGameplayAbility>& AttackAbility : ClassDefaultInfo.StartupAbilities)
+	{
+		FGameplayAbilitySpec GASpec = FGameplayAbilitySpec(AttackAbility,Lever);
 		EnemyASC->GiveAbility(GASpec);
 	}
 }
@@ -132,3 +148,42 @@ inline void UMyFunctionLibrary::SetIsCriticalHit(FGameplayEffectContextHandle& E
  	AuraGameplayEffectContext->SetCriticalHit(IsCriticalHitHit);
  	
  }
+
+void UMyFunctionLibrary::GetLivePlayersWithinRadius(const UObject* WorldContextObject, float Radius,
+	TArray<AActor*>& OutOverlappingActors, TArray<AActor*>& ActorsToIgnore, const FVector& SphereOrigin)
+{
+	FCollisionQueryParams SphereParams;
+	SphereParams.AddIgnoredActors(ActorsToIgnore);
+
+	/*创建一个存储碰撞的Actor数组*/
+	TArray<FOverlapResult> Overlaps;
+	/*获取当前场景，获取不到的话打印Null*/
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject,EGetWorldErrorMode::LogAndReturnNull))
+	{
+		World->OverlapMultiByObjectType(Overlaps, SphereOrigin, FQuat::Identity, FCollisionObjectQueryParams(FCollisionObjectQueryParams::InitType::AllDynamicObjects), FCollisionShape::MakeSphere(Radius), SphereParams);
+		/*遍历碰撞的Actor*/
+		for (FOverlapResult& OverlapResult : Overlaps)
+		{
+			/*判断当前Actor是否包含战斗接口*/
+			const bool Implements = OverlapResult.GetActor()->Implements<UCombotInterface>();
+			if (Implements && !ICombotInterface::Execute_IsDead(OverlapResult.GetActor()))
+			{
+				/*如果存活并且战斗接口加载成功把他添加到输出重叠数组中*/
+				OutOverlappingActors.AddUnique(OverlapResult.GetActor());
+			}
+		}
+	}
+}
+
+bool UMyFunctionLibrary::ISNotFriend(AActor* FirstActor, AActor* SecondActor)
+{
+	if (FirstActor->ActorHasTag("Player"))
+	{
+		return !SecondActor->ActorHasTag("Player");
+	}
+	if (SecondActor->ActorHasTag("Enemy"))
+	{
+		return !FirstActor->ActorHasTag("Enemy");
+	}
+	return false;
+}

@@ -25,4 +25,14 @@ public:
 	//敌人高亮接口
 	virtual void HighLightActor() = 0;
 	virtual void UnHighLightActor() = 0;
+
+	/*传递Enemy攻击目标*/
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void SetCombotTarget(AActor* CombotTarget);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	AActor* GetCombotTarget();
+
+
 };

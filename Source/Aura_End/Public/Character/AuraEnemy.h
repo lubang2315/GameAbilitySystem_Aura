@@ -37,13 +37,20 @@ public:
 
 	virtual void Die() override;
 
+	/*传递Enemy攻击目标*/
+	UPROPERTY(BlueprintReadWrite,Category="Combat")
+	TObjectPtr<AActor> CombotActor;
+	
+	virtual void SetCombotTarget_Implementation(AActor* CombotTarget) override;
+	virtual AActor* GetCombotTarget_Implementation() override;
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Combat")
 	float LifeSpan = 5.f;
 
-	UPROPERTY(BlueprintReadOnly,Category = "Combot")
+	UPROPERTY(BlueprintReadOnly,Category = "Combat")
 	bool bHitReacting = false;
 
-	UPROPERTY(BlueprintReadOnly,Category = "Combot")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = "Combat")
 	float BaseWalkSpeed = 250.f;
 	
     void HitReactTagChanged(const FGameplayTag CallBackTag,int32 NewCount);

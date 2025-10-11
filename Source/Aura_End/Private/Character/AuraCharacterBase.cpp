@@ -7,6 +7,7 @@
 #include "Aura_End/Aura_End.h"
 #include "Components/CapsuleComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
+#include "Tags/AuraGameplayTags.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -65,7 +66,12 @@ void AAuraCharacterBase::MultCastHandleDeath_Implementation()
 	/*调用死亡溶解*/
 	Dissolve();
 	
-	
+	bDead = true;
+}
+
+TArray<FTaggedMontage> AAuraCharacterBase::GetTaggedMontages_Implementation()
+{
+	return AttackMontage;
 }
 
 // Called when the game starts or when spawned
@@ -75,10 +81,32 @@ void AAuraCharacterBase::BeginPlay()
 	
 }
 
-FVector AAuraCharacterBase::GetCombatSocketLocation()
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const
 {
-	check(Weapon)
-	return Weapon->GetSocketLocation(WeaponTipSocketName);
+	const FMyGameplayTags& GameplayTags = FMyGameplayTags::Get();
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_Weapon) && IsValid(Weapon))
+	{
+		return Weapon->GetSocketLocation(WeaponTipSocketName);
+	}
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_LeftHand))
+	{
+		return GetMesh()->GetSocketLocation(LeftHandSocketName);
+	}
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_RightHand))
+	{
+		return GetMesh()->GetSocketLocation(RightHandSocketName);
+	}
+	return FVector();
+}
+
+bool AAuraCharacterBase::IsDead_Implementation()
+{
+	return bDead;
+}
+
+AActor* AAuraCharacterBase::GetAvatar_Implementation()
+{
+	return this;
 }
 
 void AAuraCharacterBase::InitAbilityActorInfo()
