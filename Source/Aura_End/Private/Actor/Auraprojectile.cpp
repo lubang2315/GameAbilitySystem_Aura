@@ -10,6 +10,7 @@
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -50,6 +51,9 @@ void AAuraprojectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	{
 		return;
 	}
+	/*判断伤害的是不是友军*/
+	if (!UMyFunctionLibrary::ISNotFriend(DamageEffectHandle.Data.Get()->GetContext().GetEffectCauser(),OtherActor)) return;
+	
 	if (!bHit)
 	{
 			PlayImpact();

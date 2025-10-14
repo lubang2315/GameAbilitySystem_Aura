@@ -9,7 +9,7 @@
 #include "Actor/Auraprojectile.h"
 #include "Tags/AuraGameplayTags.h"
 #include "Interface/CombotInterface.h"
-
+/*激活技能*/
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                            const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                            const FGameplayEventData* TriggerEventData)
@@ -17,20 +17,19 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 }
-
+/*初始化投射物的位置和角度，并发射投射物*/
 void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
 {   /*判断此函数是否在服务器运行*/
 	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority();
 	if (!bIsServer) return;
-
-	
+	/*从CombatInterFace获取玩家位置，和武器插槽位置*/
 	if (ICombotInterface* CombotInterface = Cast<ICombotInterface>(GetAvatarActorFromActorInfo()))
 	{
         const FVector SocketLocation =  ICombotInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(),FMyGameplayTags::Get().Montage_Attack_Weapon);
 		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
 		//Rotation.Pitch = 0.f;
 	
-		
+		/*Set投射物角度*/
 		FTransform SpawnTransform;
 		SpawnTransform.SetLocation(SocketLocation);
         SpawnTransform.SetRotation(Rotation.Quaternion());

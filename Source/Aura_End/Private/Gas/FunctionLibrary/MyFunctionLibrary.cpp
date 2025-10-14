@@ -177,13 +177,9 @@ void UMyFunctionLibrary::GetLivePlayersWithinRadius(const UObject* WorldContextO
 
 bool UMyFunctionLibrary::ISNotFriend(AActor* FirstActor, AActor* SecondActor)
 {
-	if (FirstActor->ActorHasTag("Player"))
-	{
-		return !SecondActor->ActorHasTag("Player");
-	}
-	if (SecondActor->ActorHasTag("Enemy"))
-	{
-		return !FirstActor->ActorHasTag("Enemy");
-	}
-	return false;
+	
+	const bool bBothArePlayers = FirstActor->ActorHasTag(FName("Player")) && SecondActor->ActorHasTag(FName("Player"));
+	const bool bBothAreEnemies = FirstActor->ActorHasTag(FName("Enemy")) && SecondActor->ActorHasTag(FName("Enemy"));
+	const bool bFriends = bBothArePlayers || bBothAreEnemies;
+	return !bFriends;
 }

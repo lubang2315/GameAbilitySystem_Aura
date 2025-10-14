@@ -49,7 +49,7 @@ protected:
 	bool bDead = false;
 
 	//创建一个可以附着在骨骼网格体上的类
-	UPROPERTY(EditAnywhere,Category="Combat")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
 	/*武器插槽*/
