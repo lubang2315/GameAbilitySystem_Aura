@@ -43,6 +43,7 @@ void AAuraEnemy::BeginPlay()
     if (HasAuthority())
     {
          UMyFunctionLibrary::GiveStartupAbilities(this,AbilitySystemComponent,CharacterClass);
+        
     }
    
 }
@@ -123,18 +124,28 @@ void AAuraEnemy::InitAbilityActorInfo()
      *OnEnemyMaxHPChangedEvent.Broadcast(AuraAttributes->GetMaxHp());*/
     
     /*这里是我自己增加延迟一帧初始化*/
+    /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+    /*注意这里调用时机有问题，我没有修复我只是利用延迟暴力修复了，等课程完成在好好研究一下*/
     FTimerHandle TimerHandle_InitBroadcast;
     GetWorld()->GetTimerManager().SetTimer(
         TimerHandle_InitBroadcast,
-        [this, AuraAttributes]()
+        [this]()
         {
-            OnEnemyHPChangedEvent.Broadcast(AuraAttributes->GetHP());
-            OnEnemyMaxHPChangedEvent.Broadcast(AuraAttributes->GetMaxHp());
+            if (UAttributeSet* AttrSet = GetAttributeSet())
+            {
+                if (UAuraAttributeSet* AuraAttrs = Cast<UAuraAttributeSet>(AttrSet))
+                {
+                    OnEnemyHPChangedEvent.Broadcast(AuraAttrs->GetHP());
+                    OnEnemyMaxHPChangedEvent.Broadcast(AuraAttrs->GetMaxHp());
+                }
+            }
         },
         0.05f, // 延迟一个 tick，让 AttributeSet 与 GE 应用完成
         false
     );
     /*end*/
+
+    
 }
 
 void AAuraEnemy::InitializePrimaryAttributes() const
@@ -145,6 +156,10 @@ void AAuraEnemy::InitializePrimaryAttributes() const
 void AAuraEnemy::Die()
 {
     SetLifeSpan(LifeSpan);
+    if (AuraAIController)
+    {
+        AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"),true);
+    }
     Super::Die();
 }
 

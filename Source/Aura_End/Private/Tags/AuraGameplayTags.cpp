@@ -65,10 +65,20 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 
 	/*Enemy Attack tag*/
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"),FString("Enemy Attack Tag"));
+	GameplayTags.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Summon"),FString("Enemy Summons minion skill"));
+	
+	/*Enemy蒙太奇攻击位置标签*/
+	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"),FString("使用武器攻击蒙太奇标签"));
+	GameplayTags.CombatSocket_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.RightHand"),FString("右手攻击蒙太奇标签"));
+	GameplayTags.CombatSocket_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.LeftHand"),FString("左手攻击蒙太奇标签"));
+	GameplayTags.CombatSocket_Tail = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Tail"),FString("尾巴攻击蒙太奇标签"));
 
-	/*Enemy蒙太奇攻击标签*/
-	GameplayTags.Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.Weapon"),FString("使用武器攻击蒙太奇标签"));
-	GameplayTags.Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.RightHand"),FString("右手攻击蒙太奇标签"));
-	GameplayTags.Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.LeftHand"),FString("左手攻击蒙太奇标签"));
+	
+	/*攻击技能标签传递，用来等待蒙太奇播放到攻击时间点告诉GA释放技能*/
+	GameplayTags.Montage_Attack_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.1"),FString("通过在蒙太奇上设置标签，通知GA该释放技能1和设置伤害了"));
+	GameplayTags.Montage_Attack_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.2"),FString("通过在蒙太奇上设置标签，通知GA该释放技能2和设置伤害了"));
+	GameplayTags.Montage_Attack_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.3"),FString("通过在蒙太奇上设置标签，通知GA该释放技能3和设置伤害了"));
+	GameplayTags.Montage_Attack_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.4"),FString("通过在蒙太奇上设置标签，通知GA该释放技能4和设置伤害了"));
+
 	
 }

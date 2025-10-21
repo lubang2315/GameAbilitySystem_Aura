@@ -10,6 +10,7 @@
 #include "Interface/CombotInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UNiagaraSystem;
 class AbilitySystemComponent;
 class AttributeSet;
 
@@ -39,10 +40,17 @@ public:
 	TArray<FTaggedMontage> AttackMontage;
 	virtual TArray<FTaggedMontage> GetTaggedMontages_Implementation() override;
 
+	/*返回受击特效*/
+	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
+
+	/*在Cue中运用，主要用来通过标签获取对应结构体*/
+	virtual FTaggedMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
+
+	/*返回随从数量*/
+	virtual int32 GetMinionCount_Implementation() override;
+	
 	/*End*/
 
-	
-	
 protected:
 	virtual void BeginPlay() override;
 
@@ -56,11 +64,14 @@ protected:
 	UPROPERTY(EditAnywhere,Category="Combat")
 	FName WeaponTipSocketName;
 
-	UPROPERTY(EditAnywhere,Category="Combat")
+	UPROPERTY(EditAnywhere,Category="Combat") 
 	FName LeftHandSocketName;
 
 	UPROPERTY(EditAnywhere,Category="Combat")
 	FName RightHandSocketName;
+
+	UPROPERTY(EditAnywhere,Category="Combat")
+	FName TailSocketName;
 	
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -105,6 +116,17 @@ protected:
 	void WeaponStartDissolveTimeline(const UMaterialInstanceDynamic* DynamicMaterialInstance);
 	/*End*/
 
+	/*受击特效*/
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	UNiagaraSystem* BloodSystem;
+
+	/*Death sound*/
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Combat")
+	USoundBase* DeathSound;
+
+	/*召唤随从数量*/
+	int32 MinionCount = 0;
+	
 private:
 	UPROPERTY(EditAnywhere,Category="Attributes")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbility;

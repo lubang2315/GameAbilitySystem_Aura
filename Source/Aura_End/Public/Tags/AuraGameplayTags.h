@@ -68,11 +68,19 @@ public:
 
 	/*Enemy Attrack tag*/
 	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
 
-	/*Enemy蒙太奇攻击标签*/
-	FGameplayTag Montage_Attack_Weapon;
-	FGameplayTag Montage_Attack_RightHand;
-	FGameplayTag Montage_Attack_LeftHand;
+	/*Enemy蒙太奇攻击位置标签*/
+	FGameplayTag CombatSocket_Weapon;
+	FGameplayTag CombatSocket_RightHand;
+	FGameplayTag CombatSocket_LeftHand;
+	FGameplayTag CombatSocket_Tail;
+
+	/*攻击技能标签传递，用来等待蒙太奇播放到攻击时间点告诉GA释放技能*/
+	FGameplayTag Montage_Attack_1;
+	FGameplayTag Montage_Attack_2;
+	FGameplayTag Montage_Attack_3;
+	FGameplayTag Montage_Attack_4;
 	
 private:
 	static FMyGameplayTags GameplayTags;

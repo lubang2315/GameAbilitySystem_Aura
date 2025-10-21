@@ -7,6 +7,7 @@
 #include "UObject/Interface.h"
 #include "CombotInterface.generated.h"
 
+class UNiagaraSystem;
 class UAnimMontage;
 
 /*创建一个结构体，用来存储蒙太奇和标签和骨骼位置的映射，用于攻击技能获取和设置攻击范围*/
@@ -22,6 +23,14 @@ struct  FTaggedMontage
 	/*对应的标签*/
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	FGameplayTag MontageTag;
+
+	/*技能释放位置的标签*/
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	FGameplayTag SocketTag;
+	
+	/*受击音效*/
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	USoundBase* ImpactSound = nullptr;
 };
 
 
@@ -65,5 +74,16 @@ public:
 	/*在本页Top生成结构体，在人物基类创建容器，在这里创建获取函数，并由人物基类覆写*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	TArray<FTaggedMontage> GetTaggedMontages();
-	
+
+	/*获取敌人受击特效*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UNiagaraSystem* GetBloodEffect();
+
+	/*通过标签传递对应的结构体*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	FTaggedMontage GetTaggedMontageByTag(const FGameplayTag& MontageTag);
+
+	/*传递随从数量*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	int32 GetMinionCount();
 };

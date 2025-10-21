@@ -5,7 +5,6 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
 #include "Actor/Auraprojectile.h"
 #include "Tags/AuraGameplayTags.h"
 #include "Interface/CombotInterface.h"
@@ -18,14 +17,14 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 
 }
 /*初始化投射物的位置和角度，并发射投射物*/
-void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag)
 {   /*判断此函数是否在服务器运行*/
 	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority();
 	if (!bIsServer) return;
 	/*从CombatInterFace获取玩家位置，和武器插槽位置*/
 	if (ICombotInterface* CombotInterface = Cast<ICombotInterface>(GetAvatarActorFromActorInfo()))
 	{
-        const FVector SocketLocation =  ICombotInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(),FMyGameplayTags::Get().Montage_Attack_Weapon);
+        const FVector SocketLocation =  ICombotInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(),SocketTag);
 		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
 		//Rotation.Pitch = 0.f;
 	

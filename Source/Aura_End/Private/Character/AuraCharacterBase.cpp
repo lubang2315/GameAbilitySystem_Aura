@@ -7,6 +7,7 @@
 #include "Aura_End/Aura_End.h"
 #include "Components/CapsuleComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tags/AuraGameplayTags.h"
 
 // Sets default values
@@ -49,6 +50,9 @@ void AAuraCharacterBase::Die()
 
 void AAuraCharacterBase::MultCastHandleDeath_Implementation()
 {
+	/*play Death Sound*/
+	UGameplayStatics::SpawnSoundAtLocation(this,DeathSound,GetActorLocation(),GetActorRotation());
+	
 	/*开启武器物理效果*/
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
@@ -74,6 +78,28 @@ TArray<FTaggedMontage> AAuraCharacterBase::GetTaggedMontages_Implementation()
 	return AttackMontage;
 }
 
+UNiagaraSystem* AAuraCharacterBase::GetBloodEffect_Implementation()
+{
+	return BloodSystem;
+}
+
+FTaggedMontage AAuraCharacterBase::GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag)
+{
+	for (FTaggedMontage TagMontage : AttackMontage)
+	{
+		if (TagMontage.MontageTag.MatchesTagExact(MontageTag))
+		{
+			return TagMontage;
+		}
+	}
+	return FTaggedMontage();
+}
+
+int32 AAuraCharacterBase::GetMinionCount_Implementation()
+{
+	return MinionCount;
+}
+
 // Called when the game starts or when spawned
 void AAuraCharacterBase::BeginPlay()
 {
@@ -84,20 +110,24 @@ void AAuraCharacterBase::BeginPlay()
 FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const
 {
 	const FMyGameplayTags& GameplayTags = FMyGameplayTags::Get();
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_Weapon) && IsValid(Weapon))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_Weapon) && IsValid(Weapon))
 	{
 		return Weapon->GetSocketLocation(WeaponTipSocketName);
 	}
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_LeftHand))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_LeftHand))
 	{
 		return GetMesh()->GetSocketLocation(LeftHandSocketName);
 	}
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_RightHand))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_RightHand))
 	{
 		return GetMesh()->GetSocketLocation(RightHandSocketName);
 	}
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_Tail))
+	{
+		return GetMesh()->GetSocketLocation(TailSocketName);
+	}
 	return FVector();
-}
+} 
 
 bool AAuraCharacterBase::IsDead_Implementation()
 {
@@ -143,7 +173,6 @@ void AAuraCharacterBase::AddCharacterAbilities() const
 
 void AAuraCharacterBase::Dissolve()
 {
-	GEngine->AddOnScreenDebugMessage(0,2,FColor::Blue,FString::Printf(TEXT("555555")));
 	if (IsValid(DissolveMaterialInstance))
 	{
 		UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(DissolveMaterialInstance,this);
