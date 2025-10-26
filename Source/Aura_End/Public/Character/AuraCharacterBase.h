@@ -48,6 +48,9 @@ public:
 
 	/*返回随从数量*/
 	virtual int32 GetMinionCount_Implementation() override;
+
+	/*设置随从数量*/
+	virtual void SetMinionCount_Implementation(int32 Amount) override;
 	
 	/*End*/
 

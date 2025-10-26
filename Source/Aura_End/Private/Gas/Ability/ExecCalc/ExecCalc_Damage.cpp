@@ -173,7 +173,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		const FGameplayTag ResistanceTag = pair.Value;
 		FGameplayEffectAttributeCaptureDefinition CaptureDefinition = SDamageStruct().TagstoCaptureDefs[ResistanceTag];
 
-		float DamageTypeValue = Spec.GetSetByCallerMagnitude(pair.Key);
+		float DamageTypeValue = Spec.GetSetByCallerMagnitude(pair.Key,false);
 
 		float ResistanceValue = 0.f;
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition,EvaluateParam,ResistanceValue);
@@ -200,6 +200,9 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	/*！同样的通过自定义的函数传递是否阻暴击*/
 	UMyFunctionLibrary::SetIsCriticalHit(EffectContextHandle,IsCriticalHit);
 	Damage = IsCriticalHit ? Damage*2.f + CriticalHitDamage : Damage;
+
+	/*测试用吧伤害提高了10！测试完可删除*/
+	Damage += 30.f;
 	
 	/*End自定义计算区域*/
 	

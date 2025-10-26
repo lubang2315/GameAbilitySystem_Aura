@@ -86,4 +86,8 @@ public:
 	/*传递随从数量*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	int32 GetMinionCount();
+
+	/*改变随从数量*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void SetMinionCount(int32 Amount);
 };

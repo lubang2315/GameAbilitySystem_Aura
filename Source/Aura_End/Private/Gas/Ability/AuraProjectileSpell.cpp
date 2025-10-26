@@ -17,7 +17,7 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 
 }
 /*初始化投射物的位置和角度，并发射投射物*/
-void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag)
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag,const bool bOverriderPitch,const float PitchOverrider)
 {   /*判断此函数是否在服务器运行*/
 	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority();
 	if (!bIsServer) return;
@@ -27,7 +27,14 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
         const FVector SocketLocation =  ICombotInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(),SocketTag);
 		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
 		//Rotation.Pitch = 0.f;
-	
+
+		/*给投射物一个向上角度*/
+		if (bOverriderPitch)
+		{
+			/*覆写发射角度*/
+			Rotation.Pitch = PitchOverrider;
+		}
+		
 		/*Set投射物角度*/
 		FTransform SpawnTransform;
 		SpawnTransform.SetLocation(SocketLocation);
