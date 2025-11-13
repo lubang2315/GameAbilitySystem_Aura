@@ -25,22 +25,46 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnManaChangedEvent.Broadcast(Data.NewValue);});
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxManaChangedEvent.Broadcast(Data.NewValue);});
 
-	
 
-	/*Tag广播 */
-	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTag.AddLambda([this](const FGameplayTagContainer& AssertTag)
+	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
 	{
-		for (const FGameplayTag& Tag : AssertTag)/*AssertTag是容器而Tag是里面的元素*/
+		if (AuraASC->bStartupAbilityGiven)
 		{
-			
-			FGameplayTag MessageTag = FGameplayTag::RequestGameplayTag(FName("Message"));
-			if (Tag.MatchesTag(MessageTag))/*MatchTag匹配标签*/
-			{
-			    FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable,Tag);
-				MessageWidgetDelegate.Broadcast(*Row);
-			}
-		    
+			OnInitializeStartupAbilities(AuraASC);
 		}
+		else
+		{
+			AuraASC->AbilityGivenDelegate.AddUObject(this, &UOverlayWidgetController::OnInitializeStartupAbilities);
+		}
+		/*Tag广播 */
+		AuraASC->EffectAssetTag.AddLambda([this](const FGameplayTagContainer& AssertTag)
+			{
+				for (const FGameplayTag& Tag : AssertTag)/*AssertTag是容器而Tag是里面的元素*/
+				{
+					
+					FGameplayTag MessageTag = FGameplayTag::RequestGameplayTag(FName("Message"));
+					if (Tag.MatchesTag(MessageTag))/*MatchTag匹配标签*/
+					{
+					    FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable,Tag);
+						MessageWidgetDelegate.Broadcast(*Row);
+					}
+				    
+				}
+			});
+	}
+	
+}
+
+void UOverlayWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AuraASC) const
+{
+	if (!AuraASC->bStartupAbilityGiven) return;
+	FForEachAbility BroadCastDelegate;
+	BroadCastDelegate.BindLambda([this](const FGameplayAbilitySpec& AbilitySpec)
+	{
+		FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(UAuraAbilitySystemComponent::GetAbilityTagFromSpec(AbilitySpec));
+		Info.InputTag = UAuraAbilitySystemComponent::GetInputTagFromSpec(AbilitySpec);
+		AbilityInfoDelegate.Broadcast(Info);
 	});
+	AuraASC->FForEachAbility(BroadCastDelegate);
 }
 

@@ -70,6 +70,12 @@ public:
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
 
+	/*Aura Ability Tag*/
+	FGameplayTag Abilities_Fire_FireBolt;
+
+	/*Aura Ability CoolDown Tag*/
+	FGameplayTag CoolDown_Fire_FireBolt;
+
 	/*Enemy蒙太奇攻击位置标签*/
 	FGameplayTag CombatSocket_Weapon;
 	FGameplayTag CombatSocket_RightHand;

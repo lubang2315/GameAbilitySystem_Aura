@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Gas/DataAsset/AbilityInfo.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "OverlayWidgetController.generated.h"
+
 
 USTRUCT(BlueprintType)
 struct FUIWidgetRow : public FTableRowBase
@@ -26,10 +28,13 @@ struct FUIWidgetRow : public FTableRowBase
 	UTexture2D* Image = nullptr;
 };
 
-class AuraUserWidget;
+class UAuraUserWidget;
+class UAbilityInfo;
+class UAuraAbilitySystemComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature,float,NewAttribute);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature,FUIWidgetRow,Row);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature,const FAuraAbilityInfo,Info);
 
 /**
  * 
@@ -58,13 +63,24 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="GAS|Message")
 	FMessageWidgetRowSignature MessageWidgetDelegate;
 
+	/*用于广播给Overlay技能栏信息结构体*/
+	UPROPERTY(BlueprintAssignable, Category="GAS|Message")
+	FAbilityInfoSignature AbilityInfoDelegate;
+
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Category="Widget Data")
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
 
+	/*技能UI数据表*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Category="Widget Data")
+	TObjectPtr<UAbilityInfo> AbilityInfo;
+
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable,const FGameplayTag& Tag);
+
+	/*AuraGAS那边技能初始化完成后触发此回调*/
+	void OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AuraASC)const;
 };
 
 template <typename T>

@@ -66,6 +66,12 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 	/*Enemy Attack tag*/
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"),FString("Enemy Attack Tag"));
 	GameplayTags.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Summon"),FString("Enemy Summons minion skill"));
+
+	/*Aura Ability Tag*/
+	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBolt"),FString("FireBolt Ability Tag About Aura"));
+
+	/*Aura Ability CoolDown Tag*/
+	GameplayTags.CoolDown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CoolDown.Fire.FireBolt"),FString("FireBolt Ability CoolDown Tag About Aura"));
 	
 	/*Enemy蒙太奇攻击位置标签*/
 	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"),FString("使用武器攻击蒙太奇标签"));

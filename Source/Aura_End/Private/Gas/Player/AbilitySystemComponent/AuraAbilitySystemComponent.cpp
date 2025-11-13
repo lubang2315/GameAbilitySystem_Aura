@@ -2,6 +2,8 @@
 
 
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
+
+#include "Aura_End/AuraAbilityInfoLogChannels.h"
 #include "Engine/Engine.h"
 #include "Gas/Ability/AuraGameplayAbility.h"
 #include "Tags/AuraGameplayTags.h"
@@ -31,6 +33,18 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			AbilitySpec.DynamicAbilityTags.AddTag(AuraGA->StartUpInputTag);
 			GiveAbility(AbilitySpec);
 		}
+		AbilityGivenDelegate.Broadcast(this);
+		bStartupAbilityGiven = true;
+	}
+}
+
+void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
+{
+	Super::OnRep_ActivateAbilities();
+	if (!bStartupAbilityGiven)
+	{
+		bStartupAbilityGiven = true;
+		AbilityGivenDelegate.Broadcast(this);
 	}
 }
 
@@ -68,8 +82,51 @@ void UAuraAbilitySystemComponent::AbilityAssetTagReleased(const FGameplayTag Gam
 	}
 }
 
+void UAuraAbilitySystemComponent::FForEachAbility(const ::FForEachAbility& Delegate)
+{
+	FScopedAbilityListLock ActiveScopedLock(*this);
+	for (const FGameplayAbilitySpec& ActivateGA : GetActivatableAbilities())
+	{
+		if (!Delegate.ExecuteIfBound(ActivateGA))
+			/*上面这个ExecuteIfBound作用就是当ActivateGA绑定到Delegate的时候会自动调用委托*/
+		{
+			UE_LOG(LogAura,Error,TEXT("在函数[%hs]运行委托失败"),__FUNCTION__);
+		}
+	}
+}
+
+FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (AbilitySpec.Ability)
+	{
+		for (FGameplayTag Tag: AbilitySpec.Ability.Get()->AbilityTags)
+		{
+			if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities"))))
+			{
+				return Tag;
+			}
+		}
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (AbilitySpec.Ability)
+	{
+		for (FGameplayTag Tag : AbilitySpec.DynamicAbilityTags)
+		{
+			if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("InputTag"))))
+			{
+				return Tag;
+			}
+		}
+	}
+	return FGameplayTag();
+}
+
 void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent,
-                                                const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle)
+                                                                     const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle)
 {
     FGameplayTagContainer TagContainer;
 	SpecApplied.GetAllAssetTags(TagContainer);
