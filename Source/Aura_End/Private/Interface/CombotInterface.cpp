@@ -4,11 +4,6 @@
 #include "Interface/CombotInterface.h"
 
 // Add default functionality here for any ICombotInterface functions that are not pure virtual.
-int32 ICombotInterface::GetPlayerLevel()
-{
-	return 0;
-}
-
 
 
 

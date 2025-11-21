@@ -87,6 +87,9 @@ public:
 	FGameplayTag Montage_Attack_2;
 	FGameplayTag Montage_Attack_3;
 	FGameplayTag Montage_Attack_4;
+
+	/*Meta Attributes Tags*/
+	FGameplayTag Attributes_Meta_InComingXP;
 	
 private:
 	static FMyGameplayTags GameplayTags;

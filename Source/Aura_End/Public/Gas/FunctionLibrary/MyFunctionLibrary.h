@@ -1,4 +1,5 @@
 // 由来时路褒贬不一制作
+//此类是蓝图函数库，只能写静态函数，像一些经常使用工具函数可以写在这里，并且可以在不同蓝图中调用。
 
 #pragma once
 
@@ -55,7 +56,10 @@ public:
 	/*在敌人使用技能攻击玩家时，通过标签判断是不是友军从而避免误伤*/
 	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
 	static bool ISNotFriend(AActor* FirstActor,AActor* SecondActor);
-	
+
+	/*根据敌人类型和等级返回相应的XP值*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharacterClassDefaults")
+	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject,int32 Level,ECharacterClass CharacterClass);
 	
 };
 

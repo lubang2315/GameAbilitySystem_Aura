@@ -54,6 +54,13 @@ public:
 	
 	/*End*/
 
+	/*设置人物类型*/
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
+	ECharacterClass CharacterClass = ECharacterClass::Warrior;
+
+	/*获取人物类型*/
+	virtual ECharacterClass GetCharacterClass_Implementation() override;
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -131,6 +138,12 @@ protected:
 	int32 MinionCount = 0;
 	
 private:
+	/*AuraGA*/
 	UPROPERTY(EditAnywhere,Category="Attributes")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbility;
+
+	/*被动技能：XP*/
+	UPROPERTY(EditAnywhere,Category="Attributes")
+	TArray<TSubclassOf<UGameplayAbility>> StartupPassiveAbility;
+	
 };

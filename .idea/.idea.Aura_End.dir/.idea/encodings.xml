@@ -23,6 +23,7 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/DataAsset/AbilityInfo.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/DataAsset/AttributeInfo.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/DataAsset/CharacterClassInfo.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/DataAsset/LevelUpInfo.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/FunctionLibrary/MyFunctionLibrary.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Gas/Player/AbilitySystemComponent/AuraAttributeSet.cpp" charset="UTF-8" />
@@ -31,6 +32,7 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Input/AuraInputConfig.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Interface/CombotInterface.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Interface/EnemyInterface.cpp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Interface/PlayerInterface.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/Tags/AuraGameplayTags.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/HUD/AuraHUDBase.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Private/UI/Widget/AuraUserWidget.cpp" charset="UTF-8" />
@@ -58,6 +60,7 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/DataAsset/AbilityInfo.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/DataAsset/AttributeInfo.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/DataAsset/CharacterClassInfo.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/DataAsset/LevelUpInfo.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/FunctionLibrary/MyFunctionLibrary.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Gas/Player/AbilitySystemComponent/AuraAttributeSet.h" charset="UTF-8" />
@@ -66,6 +69,7 @@
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Input/AuraInputConfig.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Interface/CombotInterface.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Interface/EnemyInterface.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Interface/PlayerInterface.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/Tags/AuraGameplayTags.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/UI/HUD/AuraHUDBase.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Source/Aura_End/Public/UI/Widget/AuraUserWidget.h" charset="UTF-8" />

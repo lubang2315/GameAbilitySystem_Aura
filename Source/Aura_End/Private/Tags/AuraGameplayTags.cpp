@@ -86,5 +86,7 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Montage_Attack_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.3"),FString("通过在蒙太奇上设置标签，通知GA该释放技能3和设置伤害了"));
 	GameplayTags.Montage_Attack_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.4"),FString("通过在蒙太奇上设置标签，通知GA该释放技能4和设置伤害了"));
 
-	
+	/*Meta Attributes Tags*/
+	GameplayTags.Attributes_Meta_InComingXP = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Meta.IncomingXP"),FString("元属性XP的标签"));
+
 }

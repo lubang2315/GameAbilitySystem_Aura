@@ -35,6 +35,9 @@ public:
 	/*添加能力，注意能力在添加后要使用还要激活 *ActivateGA**/
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
 
+	/*添加被动能力*/
+	void AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupPassiveAbilities);
+
 	/*获取可激活技能自动在客户端调用下面函数，在这里用来绑定回调通知客户端触发技能信息UI*/
 	virtual void OnRep_ActivateAbilities() override;
 

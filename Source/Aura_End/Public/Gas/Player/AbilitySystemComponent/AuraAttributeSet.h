@@ -1,4 +1,5 @@
 // 由来时路褒贬不一制作
+//元属性跟普通属性有什么区别吗，其实就是元属性是接收数值然后经过各种自定义计算输出数值，并且计算完输出后不会保存数据，而普通属性就是直接计算属性值并且保存不适合复杂计算。
 
 #pragma once
 
@@ -69,6 +70,7 @@ public:
 	/*主要属性*/
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Strength,Category = "Vital Attributes")
     FGameplayAttributeData Strength;
+	/*下面这个数属性访问的宏，加了他还有在其他地方直接读取访问和修改*/
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,Strength);
 
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Intelligence,Category = "Vital Attributes")
@@ -87,6 +89,10 @@ public:
 	UPROPERTY(BlueprintReadOnly,Category = "Meta Attributes")
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,IncomingDamage);
+
+	UPROPERTY(BlueprintReadOnly,Category = "Meta Attributes")
+	FGameplayAttributeData IncomingXP;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,IncomingXP);
 	
 	/*次级属性*/
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_HP/*回调函数*/,Category = "Vital Attributes")
@@ -223,6 +229,9 @@ public:
 	
 private:
 	void ShowFloatingText(const FEffectPropreties& Props,float DamageValue,bool IsBlockHit,bool IsCriticalHit);
+
+	/*在蓝图中通过GA监听，通过下面函数触发，通过这种方式来修改XP*/
+	void SendXPEvent(const FEffectPropreties& Props);
 };
 
 

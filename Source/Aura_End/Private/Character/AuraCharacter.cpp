@@ -4,11 +4,15 @@
 #include "Character/AuraCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Character/AuraPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Gas/DataAsset/LevelUpInfo.h"
 #include "Gas/Player/AuraPlayerState.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "UI/HUD/AuraHUDBase.h"
+#include "NiagaraComponent.h"
 
 AAuraCharacter::AAuraCharacter()
 {
@@ -23,6 +27,25 @@ AAuraCharacter::AAuraCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+
+	/*设置人物类型，因为敌人需要类型而我把类型写在基类了所以Aura随便定义一个类型。*/
+	CharacterClass = ECharacterClass::Elementalist;
+
+	/*设置相机*/
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("Spring Arm Component");
+	SpringArmComponent->SetupAttachment(GetRootComponent());
+	SpringArmComponent->SetUsingAbsoluteRotation(true);
+	SpringArmComponent->bDoCollisionTest = false;
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
+	CameraComponent->SetupAttachment(SpringArmComponent,USpringArmComponent::SocketName);
+	CameraComponent->bUsePawnControlRotation = false;
+	/*End*/
+
+	/*设置升级粒子特效附着在骨骼上*/
+	LevelUpNiagara = CreateDefaultSubobject<UNiagaraComponent>("LevelUpNiagara");
+	LevelUpNiagara->SetupAttachment(GetRootComponent());
+	LevelUpNiagara->bAutoActivate = false;
 	
 }
 void AAuraCharacter::PossessedBy(AController* NewController)
@@ -37,6 +60,80 @@ void AAuraCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 	InitAbilityActorInfo();
 }
+
+void AAuraCharacter::AddToXP_Implementation(int32 InXP)
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+
+	AuraPlayerState->AddToXP(InXP);
+}
+
+int32 AAuraCharacter::GetXP_Implementation() const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return  AuraPlayerState->GetPlayerXP();
+}
+
+void AAuraCharacter::AddToPlayerLevel_Implementation(int32 InPlayerLevel)
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return  AuraPlayerState->AddToLevel(InPlayerLevel);
+}
+
+void AAuraCharacter::LevelUp_Implementation()
+{
+	//TODO :角色升级时播放升级效果
+	MulticastLevelUpParticles();
+}
+
+void AAuraCharacter::MulticastLevelUpParticles_Implementation() const
+{
+	/*因为上面那个levelUp函数只能服务器调用，所以这里创建一个调用后会同步调用客户端执行函数来播放升级特效*/
+	if (IsValid(LevelUpNiagara))
+	{
+		/*把粒子播放方向与相机相对*/
+		const FVector CameraLocation = CameraComponent->GetComponentLocation();
+		const FVector NiagaraLocation = LevelUpNiagara->GetComponentLocation();
+		const FRotator NiagaraRotation = (NiagaraLocation - CameraLocation).Rotation();
+		LevelUpNiagara->SetWorldRotation(NiagaraRotation);
+		LevelUpNiagara->Activate(true);
+	}
+}
+
+int32 AAuraCharacter::FindLevelForXP_Implementation(int32 XP) const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return  AuraPlayerState->LevelUpInfo->FindLevelForXP(XP);
+}
+
+void AAuraCharacter::AddToAttributePoints_Implementation(int32 InAttributePoints)
+{
+	//TODO :实现增加属性点
+}
+
+int32 AAuraCharacter::GetAttributePointsReward_Implementation(int32 Level) const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return  AuraPlayerState->LevelUpInfo->LevelUpInfo[Level].AttributePointAward;
+}
+
+void AAuraCharacter::AddToSpellPoints_Implementation(int32 InSpellPoints)
+{
+	//TODO ：实现增加技能点
+}
+
+int32 AAuraCharacter::GetSpellPointsReward_Implementation(int32 Level) const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return  AuraPlayerState->LevelUpInfo->LevelUpInfo[Level].SpellPointAward;
+}
+
 void AAuraCharacter::InitAbilityActorInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
@@ -57,13 +154,14 @@ void AAuraCharacter::InitAbilityActorInfo()
 	InitializePrimaryAttributes();
 }
 
-int32 AAuraCharacter::GetPlayerLevel()
+int32 AAuraCharacter::GetPlayerLevel_Implementation()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	return AuraPlayerState->GetPlayerLevel();
 	
 }
+
 
 
 

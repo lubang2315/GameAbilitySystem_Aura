@@ -97,10 +97,18 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	 AActor* SourceCharacter = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
 	 AActor* TargetCharacter = TagrgetASC ? TagrgetASC->GetAvatarActor() : nullptr;
 
-	
-	 ICombotInterface* SourceCombotInterface = Cast<ICombotInterface>(SourceCharacter);
-	 ICombotInterface* TargetCombotInterface = Cast<ICombotInterface>(TargetCharacter);
+	int32 SourceLevel = 1;
+	if (SourceCharacter->Implements<UCombotInterface>())
+	{
+		SourceLevel = ICombotInterface::Execute_GetPlayerLevel(SourceCharacter);
+	}
 
+	int32 TargetLevel = 1;
+	if (SourceCharacter->Implements<UCombotInterface>())
+	{
+		TargetLevel = ICombotInterface::Execute_GetPlayerLevel(SourceCharacter);
+	}
+	
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
 	
 	const FGameplayTagContainer* OwnTag = Spec.CapturedSourceTags.GetAggregatedTags();
@@ -153,13 +161,13 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	/*从自建曲线表格中获取值*/
 	FRealCurve* ArmorPenetrationCurve = SourceCharacterInfo->DamageCulationCoefficicients->FindCurve(FName("ArmorPenetration"),FString());
-	const float ArmorPenetrationCoefficient = ArmorPenetrationCurve->Eval(SourceCombotInterface->GetPlayerLevel());
+	const float ArmorPenetrationCoefficient = ArmorPenetrationCurve->Eval(SourceLevel);
 	
 	FRealCurve* EffectiveArmorCurve = SourceCharacterInfo->DamageCulationCoefficicients->FindCurve(FName("EffeciveArmor"),FString());
-	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(SourceCombotInterface->GetPlayerLevel());
+	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(TargetLevel);
 
 	FRealCurve* CriticalHitResistanceCurve = SourceCharacterInfo->DamageCulationCoefficicients->FindCurve(FName("CriticalHitResistance"),FString());
-	const float CriticalHitResistanceCoefficient = CriticalHitResistanceCurve->Eval(SourceCombotInterface->GetPlayerLevel());
+	const float CriticalHitResistanceCoefficient = CriticalHitResistanceCurve->Eval(TargetLevel);
 
 	/*自定义计算属性区域*/
 	/*护甲属性计算*/

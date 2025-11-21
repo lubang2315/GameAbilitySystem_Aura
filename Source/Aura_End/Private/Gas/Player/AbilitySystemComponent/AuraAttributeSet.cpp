@@ -4,11 +4,14 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Engine/Engine.h"
 #include "GameplayEffectExtension.h"
+#include "Aura_End/AuraAbilityInfoLogChannels.h"
 #include "Character/AuraPlayerController.h"
 #include "GameFramework/Character.h"
 #include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 #include "Interface/CombotInterface.h"
+#include "Interface/PlayerInterface.h"
 #include "Net/UnrealNetwork.h"
+#include "Tags/AuraGameplayTags.h"
 #include "Tags/AuraGameplayTags.h"
 
 
@@ -81,9 +84,6 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	if (Attribute == GetHPAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f,GetMaxHp());
-		////////////////////////////////////////////////////////
-		UE_LOG(LogTemp,Warning,TEXT("HP:%f"),NewValue);
-		
 	}
 }
 
@@ -97,8 +97,6 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 	if (Data.EvaluatedData.Attribute == GetHPAttribute())
 	{
 		SetHP(FMath::Clamp(GetHP(),0.f,GetMaxHp()));
-		///////////////////////////////////////////////////////////
-	    UE_LOG(LogTemp,Warning,TEXT("TargetActor:%s,DamageValue:%f"),*Props.TargetActor->GetName(),GetHP());
 	}
 	if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
@@ -121,6 +119,8 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 				{
 					CombotInterface->Die();
 				}
+				/*死亡时，发送经验事件*/
+				SendXPEvent(Props);
 			}
 			else
 			{
@@ -135,6 +135,43 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 		}
 	}
 
+	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
+	{
+		const float LocalValue = GetIncomingXP();
+		SetIncomingXP(0.f);
+		
+		/*先检测是不是玩家，然后将经验应用给自身*/
+		if (Props.SourceActor->Implements<UPlayerInterface>() && Props.SourceActor->Implements<UCombotInterface>())
+		{
+			/*获取当前玩家当前等级和经验*/
+			const int32 CurrentLevel = ICombotInterface::Execute_GetPlayerLevel(Props.SourceActor);
+			const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceActor);
+
+			/*获取升级后的新等级*/
+			const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceActor,CurrentXP + LocalValue);
+			const int32 NumLevelUps = NewLevel - CurrentLevel;
+
+			if (NumLevelUps > 0)
+			{
+				/*获取升级奖励的技能点和属性点*/
+				const int32 RewardSpellPoints = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceActor,CurrentLevel);
+				const int32 RewardAttributePoints  = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceActor,CurrentLevel);
+
+				/*提升等级，增加角色技能点和属性点*/
+				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceActor,NumLevelUps);
+				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceActor,RewardSpellPoints);
+				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceActor,RewardAttributePoints);
+
+				IPlayerInterface::Execute_LevelUp(Props.SourceActor);
+
+				/*每次升级都重置血量和蓝量*/
+				SetHP(GetMaxHp());
+				SetMana(GetMaxMana());
+			}
+			
+			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter,LocalValue);
+		}
+	}
 }
 
 void UAuraAttributeSet::ShowFloatingText(const FEffectPropreties& Props, float DamageValue,bool IsBlockHit,bool IsCriticalHit)
@@ -153,6 +190,29 @@ void UAuraAttributeSet::ShowFloatingText(const FEffectPropreties& Props, float D
 			AuraPC->ShowDamageNumber(DamageValue,Props.TargetCharacter,IsBlockHit,IsCriticalHit);
 		}
 	}
+}
+
+void UAuraAttributeSet::SendXPEvent(const FEffectPropreties& Props)
+{
+	int32 Level = 1;
+	if (Props.TargetActor->Implements<UCombotInterface>())
+	{
+		/*获取敌人等级，获取敌人类型，获取经验值*/
+		Level = ICombotInterface::Execute_GetPlayerLevel(Props.TargetActor);
+		const ECharacterClass CharacterClass = ICombotInterface::Execute_GetCharacterClass(Props.TargetCharacter);
+		const int32 XPReward = UMyFunctionLibrary::GetXPRewardForClassAndLevel(Props.TargetCharacter,Level,CharacterClass);
+
+		/*获取标签,和创建一个Payload因为发送标签在SendGameplayEventToActor函数中可以利用这个数据包传送XP值*/
+		const FMyGameplayTags& GameplayTags= FMyGameplayTags::Get();
+		FGameplayEventData EventData;
+		EventData.EventTag = GameplayTags.Attributes_Meta_InComingXP;
+		EventData.EventMagnitude = XPReward;
+
+		/*通过标签激活然后GA那边收到就会在GA已经激活情况下在GA内部异步激活后续逻辑*/
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceActor,GameplayTags.Attributes_Meta_InComingXP,EventData);
+	}
+	
+	
 }
 
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectPropreties& Props)

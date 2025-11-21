@@ -1,9 +1,11 @@
 // 由来时路褒贬不一制作
+//这里战斗接口
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Gas/DataAsset/CharacterClassInfo.h"
 #include "UObject/Interface.h"
 #include "CombotInterface.generated.h"
 
@@ -50,7 +52,8 @@ class AURA_END_API ICombotInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual int32 GetPlayerLevel();
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetPlayerLevel();
 
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag)const;
@@ -90,4 +93,8 @@ public:
 	/*改变随从数量*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void SetMinionCount(int32 Amount);
+
+	/*获取敌人类型*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	ECharacterClass GetCharacterClass();
 };

@@ -91,9 +91,13 @@ void UMyFunctionLibrary::GiveStartupAbilities(const UObject* WordContextObject, 
 		FGameplayAbilitySpec GASpec = FGameplayAbilitySpec(AbilityClass,1);
 		EnemyASC->GiveAbility(GASpec);
 	}
-
-	ICombotInterface* CombotInterface = Cast<ICombotInterface>(EnemyASC->GetAvatarActor());
-	int32 Lever = CombotInterface->GetPlayerLevel();
+	
+	int32 Lever = 1;
+	if (EnemyASC->GetAvatarActor()->Implements<UCombotInterface>())
+	{
+		Lever = ICombotInterface::Execute_GetPlayerLevel(EnemyASC->GetAvatarActor());
+	}
+	
 
 	/*因为不同类型Enemy攻击技能不同所以与上述的共同能力区分，这里通过传入Enemy类型返回攻击技能*/
 	const FCharacterClassDefaultInfo ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
@@ -182,4 +186,16 @@ bool UMyFunctionLibrary::ISNotFriend(AActor* FirstActor, AActor* SecondActor)
 	const bool bBothAreEnemies = FirstActor->ActorHasTag(FName("Enemy")) && SecondActor->ActorHasTag(FName("Enemy"));
 	const bool bFriends = bBothArePlayers || bBothAreEnemies;
 	return !bFriends;
+}
+
+int32 UMyFunctionLibrary::GetXPRewardForClassAndLevel(const UObject* WorldContextObject, int32 Level,ECharacterClass CharacterClass)
+{
+	/*从世界上下文对象中获得游戏模式然后从游戏模式中获得数据资产*/
+	UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if (!CharacterClassInfo) return 0;
+
+	FCharacterClassDefaultInfo CharacterInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
+	int32 XPReward = CharacterInfo.XPReward.GetValueAtLevel(Level);
+
+	return  static_cast<float>(XPReward);
 }

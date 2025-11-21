@@ -58,10 +58,7 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
 	int32 Level = 1;
     /*设置敌人属性*/
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
-
-	virtual int32 GetPlayerLevel() override;
+	virtual int32 GetPlayerLevel_Implementation() override;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Widget")
 	TObjectPtr<UWidgetComponent> HPWidget;

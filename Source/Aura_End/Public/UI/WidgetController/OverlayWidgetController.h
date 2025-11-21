@@ -32,6 +32,7 @@ class UAuraUserWidget;
 class UAbilityInfo;
 class UAuraAbilitySystemComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChangedSignature,int32,NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature,float,NewAttribute);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature,FUIWidgetRow,Row);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature,const FAuraAbilityInfo,Info);
@@ -44,6 +45,7 @@ class AURA_END_API UOverlayWidgetController : public UAuraWidgetController
 {
 	GENERATED_BODY()
 public:
+	/*广播初值*/
 	virtual void BroadcastInitialValues() override;
 
 	virtual void BindCallbacksToDependencies() override;
@@ -60,6 +62,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="GAS|AttributSet")
 	FOnAttributeChangedSignature OnMaxManaChangedEvent;
 
+	/*广播XP百分比格式数据*/
+	UPROPERTY(BlueprintAssignable, Category="GAS|XP")
+	FOnAttributeChangedSignature OnXPChangedDelegate;
+	
 	UPROPERTY(BlueprintAssignable, Category="GAS|Message")
 	FMessageWidgetRowSignature MessageWidgetDelegate;
 
@@ -67,6 +73,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="GAS|Message")
 	FAbilityInfoSignature AbilityInfoDelegate;
 
+	/*广播玩家等级*/
+	UPROPERTY(BlueprintAssignable, Category="GAS|Level")
+	FOnPlayerStateChangedSignature OnPlayerLevelChangedDelegate;
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Category="Widget Data")
@@ -81,6 +90,9 @@ protected:
 
 	/*AuraGAS那边技能初始化完成后触发此回调*/
 	void OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AuraASC)const;
+
+	/*当XP变化后调用此函数*/
+	void OnXPChanged(int32 NewXP) const;
 };
 
 template <typename T>
