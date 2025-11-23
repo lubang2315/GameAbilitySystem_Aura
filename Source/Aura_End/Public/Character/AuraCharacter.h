@@ -42,6 +42,10 @@ public:
 	virtual void AddToSpellPoints_Implementation(int32 InSpellPoints) override;
 	/*获取技能点*/
 	virtual int32 GetSpellPointsReward_Implementation(int32 Level) const override;
+	/*获取可分配的属性点数*/
+	virtual int32 GetAttributePoints_Implementation() const override;
+	/*获取可分配的技能点数*/
+	virtual int32 GetSpellPoints_Implementation() const override;
 	/*End*/
 
 	/*在C++里面写摄像机组件和弹簧臂，主要是可以方便获取旋转*/
@@ -55,7 +59,7 @@ public:
 	/*升级粒子特效*/
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	TObjectPtr<UNiagaraComponent> LevelUpNiagara;
-	
+
 private:
 	virtual void InitAbilityActorInfo() override;
 

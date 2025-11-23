@@ -51,6 +51,15 @@ public:
 	/*帮助OverlayWidgetController获取技能标签和Input标签*/
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+
+	/*消耗属性点升级属性*/
+	UFUNCTION(BlueprintCallable, Category="GAS|Attributes")
+	void UpGradeAttribute(const FGameplayTag& AttributeTag);
+
+	/*服务器运行，消耗属性点升级属性*/
+	UFUNCTION(Server,Reliable)
+	void ServerUpGradeAttribute(const FGameplayTag& AttributeTag);
+	
 protected:
 	UFUNCTION(Client, reliable)
     void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle);

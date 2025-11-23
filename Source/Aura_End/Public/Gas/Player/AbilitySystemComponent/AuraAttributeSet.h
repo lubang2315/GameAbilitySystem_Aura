@@ -57,6 +57,9 @@ public:
 	UAuraAttributeSet();
 	/**设置服务器属性值复制到客户端，用于预测系统，我们已经把过去值和限值提交给能力系统管理，当服务器收到改变值会验证有效性并同步其他客户端*/
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/*在升级后重置血量蓝量为最大值，下面这个预制函数在修改GE后自动调用*/
+	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
 	
     /**开始，夹值*/
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
@@ -232,6 +235,10 @@ private:
 
 	/*在蓝图中通过GA监听，通过下面函数触发，通过这种方式来修改XP*/
 	void SendXPEvent(const FEffectPropreties& Props);
+
+	/*用来辅助是否重置血量蓝量*/
+	bool bFillHealth = false;
+	bool bFillMana = false;
 };
 
 

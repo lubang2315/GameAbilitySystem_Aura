@@ -112,7 +112,9 @@ int32 AAuraCharacter::FindLevelForXP_Implementation(int32 XP) const
 
 void AAuraCharacter::AddToAttributePoints_Implementation(int32 InAttributePoints)
 {
-	//TODO :实现增加属性点
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->AddToAttributePoints(InAttributePoints);
 }
 
 int32 AAuraCharacter::GetAttributePointsReward_Implementation(int32 Level) const
@@ -124,7 +126,9 @@ int32 AAuraCharacter::GetAttributePointsReward_Implementation(int32 Level) const
 
 void AAuraCharacter::AddToSpellPoints_Implementation(int32 InSpellPoints)
 {
-	//TODO ：实现增加技能点
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->AddToSpellPoints(InSpellPoints);
 }
 
 int32 AAuraCharacter::GetSpellPointsReward_Implementation(int32 Level) const
@@ -132,6 +136,20 @@ int32 AAuraCharacter::GetSpellPointsReward_Implementation(int32 Level) const
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	return  AuraPlayerState->LevelUpInfo->LevelUpInfo[Level].SpellPointAward;
+}
+
+int32 AAuraCharacter::GetAttributePoints_Implementation() const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->GetPlayerAttributePoints();
+}
+
+int32 AAuraCharacter::GetSpellPoints_Implementation() const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->GetPlayerSpellPoints();
 }
 
 void AAuraCharacter::InitAbilityActorInfo()

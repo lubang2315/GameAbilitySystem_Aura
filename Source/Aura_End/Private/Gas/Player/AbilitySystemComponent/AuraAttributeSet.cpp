@@ -77,6 +77,21 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	
 }
 
+void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+	if (Attribute == GetMaxHpAttribute() && bFillHealth)
+	{
+		SetHP(GetMaxHp());
+		bFillHealth = false;
+	}
+	if (Attribute == GetMaxManaAttribute() && bFillMana)
+	{
+		SetMana(GetMaxMana());
+		bFillMana = false;
+	}
+}
+
 void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
@@ -153,20 +168,24 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 
 			if (NumLevelUps > 0)
 			{
-				/*获取升级奖励的技能点和属性点*/
-				const int32 RewardSpellPoints = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceActor,CurrentLevel);
-				const int32 RewardAttributePoints  = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceActor,CurrentLevel);
-
-				/*提升等级，增加角色技能点和属性点*/
-				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceActor,NumLevelUps);
-				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceActor,RewardSpellPoints);
-				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceActor,RewardAttributePoints);
-
+				for (int32 i = CurrentLevel; i < NewLevel; i++)
+				{
+					/*获取升级奖励的技能点和属性点*/
+					const int32 RewardSpellPoints = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceActor,CurrentLevel);
+					const int32 RewardAttributePoints  = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceActor,CurrentLevel);
+                    
+					/*提升等级，增加角色技能点和属性点*/
+					IPlayerInterface::Execute_AddToSpellPoints(Props.SourceActor,RewardSpellPoints);
+					IPlayerInterface::Execute_AddToAttributePoints(Props.SourceActor,RewardAttributePoints);
+				}
+				
 				IPlayerInterface::Execute_LevelUp(Props.SourceActor);
+				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceActor,NumLevelUps);
 
 				/*每次升级都重置血量和蓝量*/
-				SetHP(GetMaxHp());
-				SetMana(GetMaxMana());
+				bFillHealth = true;
+				bFillMana = true;
+				
 			}
 			
 			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter,LocalValue);

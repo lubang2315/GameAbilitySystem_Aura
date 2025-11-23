@@ -6,6 +6,8 @@
 #include "Gas/Player/AuraPlayerState.h"
 #include "AuraWidgetController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChangedSignature,int32,NewValue);
+
 class AbilitySystemComponent;
 class AttributeSet;
 

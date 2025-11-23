@@ -3,9 +3,11 @@
 
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Aura_End/AuraAbilityInfoLogChannels.h"
 #include "Engine/Engine.h"
 #include "Gas/Ability/AuraGameplayAbility.h"
+#include "Interface/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"
 
 
@@ -135,8 +137,36 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbi
 	return FGameplayTag();
 }
 
-void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent,
-                                                                     const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle)
+void UAuraAbilitySystemComponent::UpGradeAttribute(const FGameplayTag& AttributeTag)
+{
+	if (GetAvatarActor()->Implements<UPlayerInterface>())
+	{
+		if (IPlayerInterface::Execute_GetAttributePoints(GetAvatarActor()) > 0)
+		{
+			ServerUpGradeAttribute(AttributeTag);
+			///////////////////////////////////////////////////////////////////////////////////////////////
+			/*注意这里没做技能点分配*/
+		}
+	}
+}
+
+void UAuraAbilitySystemComponent::ServerUpGradeAttribute_Implementation(const FGameplayTag& AttributeTag)
+{
+	FGameplayEventData payload;
+	payload.EventTag = AttributeTag;
+	payload.EventMagnitude = 1.f;
+
+	/*发送标签，通过标签激活被动技能里面事件然后修改值*/
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetAvatarActor(),AttributeTag,payload);
+
+	/*修改权威可分配属性点减一*/
+	if (GetAvatarActor()->Implements<UPlayerInterface>())
+	{
+		IPlayerInterface::Execute_AddToAttributePoints(GetAvatarActor(),-1);
+	}
+}
+
+void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent,const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle)
 {
     FGameplayTagContainer TagContainer;
 	SpecApplied.GetAllAssetTags(TagContainer);

@@ -57,5 +57,12 @@ public:
 	/*获取技能点*/
 	UFUNCTION(BlueprintNativeEvent)
 	int32 GetSpellPointsReward(int32 Level) const;
+
+	/*获取可分配属性点数*/
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetAttributePoints() const;
 	
+	/*获取可分配属性点数*/
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetSpellPoints() const;
 };
