@@ -12,9 +12,11 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(EffectAssetTag,const FGameplayTagContainer& /*AssetTag*/)
 /*下面这个委托，技能初始化后调用的委托，目前只是通知技能UI，技能已经初始化完成可以获取技能信息，并加载到OverlayUI里面的技能栏*/
-DECLARE_MULTICAST_DELEGATE_OneParam(FAbilityGiven,UAuraAbilitySystemComponent*)
+DECLARE_MULTICAST_DELEGATE(FAbilityGiven)
 /*遍历已经激活的技能*/
 DECLARE_DELEGATE_OneParam(FForEachAbility,const FGameplayAbilitySpec&)
+/*广播技能解锁状态*/
+DECLARE_MULTICAST_DELEGATE_TwoParams(FAbilityStatusChanged,const FGameplayTag& /*技能标签*/,const FGameplayTag& /*解锁状态标签*/)
 
 UCLASS()
 class AURA_END_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
@@ -30,7 +32,9 @@ public:
 	/*创建回调函数，技能初始化完成广播,在这里因为不确定OverlayWidgetController那边绑定回调时这里的广播是否创建所以这里加一个bool用来辅助判断*/
 	FAbilityGiven AbilityGivenDelegate;
 	bool bStartupAbilityGiven = false;
-	
+
+	/*技能解锁状态更新委托*/
+	FAbilityStatusChanged AbilityStatusChangedDelegate;
 
 	/*添加能力，注意能力在添加后要使用还要激活 *ActivateGA**/
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
@@ -48,10 +52,17 @@ public:
 	/*遍历激活技能，并广播*/
 	void FForEachAbility(const FForEachAbility& Delegate);
 
-	/*帮助OverlayWidgetController获取技能标签和Input标签*/
+	/*帮助WidgetController获取技能标签和Input标签*/
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	static FGameplayTag GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 
+	/*通过技能标签获取已经创建的技能*/
+	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& GameplayTag);
+
+	/*根据角色等级更新技能在技能Menu中状态*/
+	void UpdateAbilityStatuses(int32 Level);
+	
 	/*消耗属性点升级属性*/
 	UFUNCTION(BlueprintCallable, Category="GAS|Attributes")
 	void UpGradeAttribute(const FGameplayTag& AttributeTag);
@@ -63,4 +74,15 @@ public:
 protected:
 	UFUNCTION(Client, reliable)
     void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle);
+
+	UFUNCTION(Client, reliable)
+	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag);
+	
 };
+
+
+
+
+
+
+

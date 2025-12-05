@@ -9,11 +9,10 @@
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
-	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
-	OnHPChangedEvent.Broadcast(AuraAttributeSet->GetHP());
-	OnMaxHPChangedEvent.Broadcast(AuraAttributeSet->GetMaxHp());
-	OnManaChangedEvent.Broadcast(AuraAttributeSet->GetMana());
-	OnMaxManaChangedEvent.Broadcast(AuraAttributeSet->GetMaxMana());
+	OnHPChangedEvent.Broadcast(GetAuraAttributeSet()->GetHP());
+	OnMaxHPChangedEvent.Broadcast(GetAuraAttributeSet()->GetMaxHp());
+	OnManaChangedEvent.Broadcast(GetAuraAttributeSet()->GetMana());
+	OnMaxManaChangedEvent.Broadcast(GetAuraAttributeSet()->GetMaxMana());
 	
 }
 
@@ -21,32 +20,29 @@ void UOverlayWidgetController::BroadcastInitialValues()
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	/*绑定回调关于XP*/
-	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
-	AuraPlayerState->OnXPChangedDelegate.AddUObject(this,&UOverlayWidgetController::OnXPChanged);
+	GetAuraPlayerState()->OnXPChangedDelegate.AddUObject(this,&UOverlayWidgetController::OnXPChanged);
 
 	/*绑定回调并直接广播玩家等级*/
-	AuraPlayerState->OnLevelChangedDelegate.AddLambda([this](int32 NewValue){OnPlayerLevelChangedDelegate.Broadcast(NewValue);});
+	GetAuraPlayerState()->OnLevelChangedDelegate.AddLambda([this](int32 NewValue){OnPlayerLevelChangedDelegate.Broadcast(NewValue);});
 	
-	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
-	
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHPAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnHPChangedEvent.Broadcast(Data.NewValue);});
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHpAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxHPChangedEvent.Broadcast(Data.NewValue);});
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnManaChangedEvent.Broadcast(Data.NewValue);});
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxManaChangedEvent.Broadcast(Data.NewValue);});
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetHPAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnHPChangedEvent.Broadcast(Data.NewValue);});
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetMaxHpAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxHPChangedEvent.Broadcast(Data.NewValue);});
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnManaChangedEvent.Broadcast(Data.NewValue);});
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetMaxManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxManaChangedEvent.Broadcast(Data.NewValue);});
 
 
-	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+	if (GetAuraAbilitySystemComponent())
 	{
-		if (AuraASC->bStartupAbilityGiven)
+		if (GetAuraAbilitySystemComponent()->bStartupAbilityGiven)
 		{
-			OnInitializeStartupAbilities(AuraASC);
+			BroadcastAbilityInfo();
 		}
 		else
 		{
-			AuraASC->AbilityGivenDelegate.AddUObject(this, &UOverlayWidgetController::OnInitializeStartupAbilities);
+			GetAuraAbilitySystemComponent()->AbilityGivenDelegate.AddUObject(this, &UOverlayWidgetController::BroadcastAbilityInfo);
 		}
 		/*Tag广播 */
-		AuraASC->EffectAssetTag.AddLambda([this](const FGameplayTagContainer& AssertTag)
+		GetAuraAbilitySystemComponent()->EffectAssetTag.AddLambda([this](const FGameplayTagContainer& AssertTag)
 			{
 				for (const FGameplayTag& Tag : AssertTag)/*AssertTag是容器而Tag是里面的元素*/
 				{
@@ -64,24 +60,10 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	
 }
 
-void UOverlayWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AuraASC) const
-{
-	if (!AuraASC->bStartupAbilityGiven) return;
-	FForEachAbility BroadCastDelegate;
-	BroadCastDelegate.BindLambda([this](const FGameplayAbilitySpec& AbilitySpec)
-	{
-		FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(UAuraAbilitySystemComponent::GetAbilityTagFromSpec(AbilitySpec));
-		Info.InputTag = UAuraAbilitySystemComponent::GetInputTagFromSpec(AbilitySpec);
-		AbilityInfoDelegate.Broadcast(Info);
-	});
-	AuraASC->FForEachAbility(BroadCastDelegate);
-}
-
-void UOverlayWidgetController::OnXPChanged(int32 NewXP) const
+void UOverlayWidgetController::OnXPChanged(int32 NewXP) 
 {
 	/*从玩家状态中获取玩家等级信息，因为玩家状态不会随着Pawn消失而重置*/
-	const AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
-	const TObjectPtr<ULevelUpInfo> LevelUpInfo = AuraPlayerState->LevelUpInfo;
+	const TObjectPtr<ULevelUpInfo> LevelUpInfo = GetAuraPlayerState()->LevelUpInfo;
 	checkf(LevelUpInfo,TEXT("没有在AuraPlayerState中查询到LevelUpInfo，请检查！"));
 
 	/*把获得的XP值转换成按等级的百分比以适应Ui百分比式进度条*/

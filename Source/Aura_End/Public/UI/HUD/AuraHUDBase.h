@@ -6,12 +6,12 @@
 #include "AbilitySystemComponent.h"
 #include "GameFramework/HUD.h"
 #include "UI/Widget/AuraUserWidget.h"
-#include "UI/WidgetController/AttributeMenuWidgetController.h"
-#include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraHUDBase.generated.h"
 
+class USpellMenuWidgetController;
 class UOverlayWidgetController;
 class UAuraUserWidget;
+class UAttributeMenuWidgetController;
 struct FWidgetControllerParams;
 
 /**
@@ -31,6 +31,8 @@ public:
 
 	UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams);
 
+	USpellMenuWidgetController* GetSpellMenuWidgetController(const FWidgetControllerParams& WCParams);
+
 	/**初始化覆盖，把AuraWidgetController传进来的值传给AuraUserWidget,并把HUD添加到主屏幕*/
 	void InitOverlay(APlayerController* PC,APlayerState* PS,UAbilitySystemComponent* ASC,UAttributeSet* AS);
 
@@ -47,8 +49,14 @@ private:
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
 
 	UPROPERTY()
-	TObjectPtr<UAttributeMenuWidgetController> MenuWidgetController;
+	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuWidgetController;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UAttributeMenuWidgetController> MenuWidgetControllerClass;
+	TSubclassOf<UAttributeMenuWidgetController> AttributeMenuWidgetControllerClass;
+
+	UPROPERTY()
+	TObjectPtr<USpellMenuWidgetController> SpellMenuWidgetController;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<USpellMenuWidgetController> SpellMenuWidgetControllerClass;
 };

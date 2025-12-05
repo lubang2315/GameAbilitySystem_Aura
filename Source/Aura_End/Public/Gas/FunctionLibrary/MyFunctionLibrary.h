@@ -9,8 +9,11 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MyFunctionLibrary.generated.h"
 
+class USpellMenuWidgetController;
 class UAttributeMenuWidgetController;
 class UOverlayWidgetController;
+struct FWidgetControllerParams;
+class AAuraHUDBase;
 /**
  * 
  */
@@ -20,20 +23,30 @@ class AURA_END_API UMyFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category = "MyAbilitySystemFunctionLibrary|WidgetController")
+	UFUNCTION(BlueprintPure, Category = "MyAbilitySystemFunctionLibrary|WidgetController",meta=(DefaultToSelf = "WorldContextObject"))
+	static bool MakeWidgetControllerParams(const UObject* WorldContextObject,FWidgetControllerParams& OutWCParams,AAuraHUDBase*& OutHUD);
+	
+	UFUNCTION(BlueprintPure, Category = "MyAbilitySystemFunctionLibrary|WidgetController",meta=(DefaultToSelf = "WorldContextObject"))
 	static UOverlayWidgetController* GetOverlayWidgetController(const UObject* WorldContextObject);
 
-	UFUNCTION(BlueprintPure, Category = "MyAbilitySystemFunctionLibrary|WidgetController")
+	UFUNCTION(BlueprintPure, Category = "MyAbilitySystemFunctionLibrary|WidgetController",meta=(DefaultToSelf = "WorldContextObject"))
 	static UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintPure, Category = "MyAbilitySystemFunctionLibrary|WidgetController",meta=(DefaultToSelf = "WorldContextObject"))
+	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable,Category = "FunctionLibrary|CharacterClassInfo")
 	static void InitializeDefaultAttribute(float Lever,ECharacterClass CharacterClass,UAbilitySystemComponent* EnemyASC,const UObject* WordContextObject);
 
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
 	static void GiveStartupAbilities(const UObject* WordContextObject,UAbilitySystemComponent* EnemyASC,ECharacterClass CharacterClass);
-
+	/*获取玩家属性技能相关信息*/
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+
+	/*获取玩家技能配置相关信息*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|AbilityInfo")
+	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 
 	/*通过自定义的FAuraGameplayEffectContext（注文件夹名AuraAbilityTypes）传递是否暴击和格挡*/
 	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")

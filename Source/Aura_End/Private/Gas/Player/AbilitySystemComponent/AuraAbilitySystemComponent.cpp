@@ -7,6 +7,8 @@
 #include "Aura_End/AuraAbilityInfoLogChannels.h"
 #include "Engine/Engine.h"
 #include "Gas/Ability/AuraGameplayAbility.h"
+#include "Gas/DataAsset/AbilityInfo.h"
+#include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 #include "Interface/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"
 
@@ -33,9 +35,10 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 		if (const UAuraGameplayAbility* AuraGA = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
 			AbilitySpec.DynamicAbilityTags.AddTag(AuraGA->StartUpInputTag);
+			AbilitySpec.DynamicAbilityTags.AddTag(FMyGameplayTags::Get().Abilities_Status_Equipped);
 			GiveAbility(AbilitySpec);
 		}
-		AbilityGivenDelegate.Broadcast(this);
+		AbilityGivenDelegate.Broadcast();
 		bStartupAbilityGiven = true;
 	}
 }
@@ -56,7 +59,7 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 	if (!bStartupAbilityGiven)
 	{
 		bStartupAbilityGiven = true;
-		AbilityGivenDelegate.Broadcast(this);
+		AbilityGivenDelegate.Broadcast();
 	}
 }
 
@@ -96,6 +99,7 @@ void UAuraAbilitySystemComponent::AbilityAssetTagReleased(const FGameplayTag Gam
 
 void UAuraAbilitySystemComponent::FForEachAbility(const ::FForEachAbility& Delegate)
 {
+	/*域锁*/
 	FScopedAbilityListLock ActiveScopedLock(*this);
 	for (const FGameplayAbilitySpec& ActivateGA : GetActivatableAbilities())
 	{
@@ -137,6 +141,60 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbi
 	return FGameplayTag();
 }
 
+FGameplayTag UAuraAbilitySystemComponent::GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	for (FGameplayTag Tag : AbilitySpec.DynamicAbilityTags)
+	{
+		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities.Status"))))
+		{
+			return Tag;
+		}
+	}
+	return FGameplayTag();
+}
+
+
+FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& GameplayTag)
+{
+	/*域锁*/
+	FScopedAbilityListLock ActiveScopeLoc(*this);
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags)
+		{
+			if (Tag.MatchesTag(GameplayTag))
+			{
+				return &AbilitySpec;
+			}
+		}
+	}
+	return nullptr;
+}
+
+void UAuraAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
+{
+	/*从GameMode获取技能配置数据*/
+	UAbilityInfo* AbilityInfo = UMyFunctionLibrary::GetAbilityInfo(GetAvatarActor());
+	for (FAuraAbilityInfo AuraAbilityInfo : AbilityInfo->Abilities)
+	{
+		if (!AuraAbilityInfo.AbilityTag.IsValid()) continue;
+		if (Level < AuraAbilityInfo.LeverRequirement) continue;
+		/*根据当前技能标签判断这个技能是否加载，没有加载就创建技能Spec加载一下，当然是在满足等级要求下*/
+		if (GetSpecFromAbilityTag(AuraAbilityInfo.AbilityTag) == nullptr)
+		{
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AuraAbilityInfo.Ability,1);
+			/*把技能解锁状态标签打上*/
+			AbilitySpec.DynamicAbilityTags.AddTag(FMyGameplayTags::Get().Abilities_Status_Eligible);
+			GiveAbility(AbilitySpec);
+			MarkAbilitySpecDirty(AbilitySpec);/*设置当前技能立刻复制到每个客户端*/
+			/*这里不直接广播，主要原因是想通过客户端执行直接广播*/
+			ClientUpdateAbilityStatus_Implementation(AuraAbilityInfo.AbilityTag,FMyGameplayTags::Get().Abilities_Status_Eligible);
+		}
+		
+		
+	}
+}
+
 void UAuraAbilitySystemComponent::UpGradeAttribute(const FGameplayTag& AttributeTag)
 {
 	if (GetAvatarActor()->Implements<UPlayerInterface>())
@@ -172,4 +230,9 @@ void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySys
 	SpecApplied.GetAllAssetTags(TagContainer);
     /*广播Tag给widget*/
 	EffectAssetTag.Broadcast(TagContainer);
+}
+
+void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag)
+{
+	AbilityStatusChangedDelegate.Broadcast(AbilityTag,StatusTag);
 }

@@ -9,45 +9,66 @@
 #include "Interface/CombotInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/HUD/AuraHUDBase.h"
+#include "UI/WidgetController/AuraWidgetController.h"
+
+bool UMyFunctionLibrary::MakeWidgetControllerParams(const UObject* WorldContextObject,FWidgetControllerParams& OutWCParams, AAuraHUDBase*& OutHUD)
+{
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject,0))
+	{
+		if (AAuraHUDBase* HUD = Cast<AAuraHUDBase>(PC->GetHUD()))
+		{
+			OutHUD = HUD;
+			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
+			UAbilitySystemComponent* ASC= PS->GetAbilitySystemComponent();
+			UAttributeSet* AS = PS->GetAttributeSet();
+            
+			OutWCParams.PlayerState = PS;
+			OutWCParams.AttributeSet = AS;
+			OutWCParams.AbilitySystemComponent = ASC;
+
+			return true;
+		}
+	}
+	return false;
+}
 
 UOverlayWidgetController* UMyFunctionLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
 {
- if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject,0))
- {
-	 if (AAuraHUDBase* HUD = Cast<AAuraHUDBase>(PC->GetHUD()))
-	 {
-
-	 	AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
-	 	UAbilitySystemComponent* ASC= PS->GetAbilitySystemComponent();
-	    UAttributeSet* AS = PS->GetAttributeSet();
-	 	const FWidgetControllerParams WCParams(PC,PS,ASC,AS);
-	 	return HUD->GetOverlayWidgetController(WCParams);
-	 }
- }
-	return nullptr;
+	FWidgetControllerParams OutWCParams;
+	AAuraHUDBase* HUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject,OutWCParams,HUD))
+	{
+		return HUD->GetOverlayWidgetController(OutWCParams);
+	}	
+		return nullptr;
 }
 
 UAttributeMenuWidgetController* UMyFunctionLibrary::GetAttributeMenuWidgetController(const UObject* WorldContextObject)
 {
 
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject,0))
+	FWidgetControllerParams OutWCParams;
+	AAuraHUDBase* HUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject,OutWCParams,HUD))
 	{
-		if (AAuraHUDBase* HUD = Cast<AAuraHUDBase>(PC->GetHUD()))
-		{
-
-			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
-			UAbilitySystemComponent* ASC= PS->GetAbilitySystemComponent();
-			UAttributeSet* AS = PS->GetAttributeSet();
-			const FWidgetControllerParams WCParams(PC,PS,ASC,AS);
-			return HUD->GetAttributeMenuWidgetController(WCParams);
-		}
-	}
+		return HUD->GetAttributeMenuWidgetController(OutWCParams);
+	}	
 	return nullptr;
 	
 }
 
+USpellMenuWidgetController* UMyFunctionLibrary::GetSpellMenuWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams OutWCParams;
+	AAuraHUDBase* HUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject,OutWCParams,HUD))
+	{
+		return HUD->GetSpellMenuWidgetController(OutWCParams);
+	}	
+	return nullptr;
+}
+
 void UMyFunctionLibrary::InitializeDefaultAttribute(float Lever, ECharacterClass CharacterClass,
-	UAbilitySystemComponent* EnemyASC, const UObject* WordContextObject)
+                                                    UAbilitySystemComponent* EnemyASC, const UObject* WordContextObject)
 {
 	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WordContextObject));
 	if (GameMode == nullptr) return;
@@ -117,6 +138,14 @@ UCharacterClassInfo* UMyFunctionLibrary::GetCharacterClassInfo(const UObject* Wo
 
 	return GameMode->CharacterClassInfo;/*从关卡中获取自己创建的数据资产，这是一种新的方式，以我现在的理解都是cast的*/
 	
+}
+
+UAbilityInfo* UMyFunctionLibrary::GetAbilityInfo(const UObject* WorldContextObject)
+{
+	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if (GameMode == nullptr) return nullptr;
+
+	return GameMode->AbilityInfo;/*上面说的其实有点问题，从游戏模式获取，根本原因要知道为什么把数据创建在游戏模式里面，是应为游戏模式存在于服务器*/
 }
 
 bool UMyFunctionLibrary::IsBlockHit(const FGameplayEffectContextHandle& EffectContextHandle)
