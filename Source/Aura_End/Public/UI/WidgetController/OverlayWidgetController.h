@@ -83,6 +83,9 @@ protected:
 
 	/*当XP变化后调用此函数*/
 	void OnXPChanged(int32 NewXP) ;
+
+	/*技能球内技能改变，广播改变前技能球信息和目标技能球的技能更新*/
+	void OnAbilityEquipped(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag,const FGameplayTag& SlotTag,const FGameplayTag& PreviousTag);
 };
 
 template <typename T>

@@ -76,7 +76,6 @@ public:
 	/*雷击技能标签，这里没完善技能仅做测试*/
 	FGameplayTag Abilities_Lightning_Electrocute;
 	
-
 	/*关于技能状态标签，以下分别是技能未解锁，可解锁，已解锁，已装备*/
 	FGameplayTag Abilities_Status_Locked;
 	FGameplayTag Abilities_Status_Eligible;
@@ -87,6 +86,9 @@ public:
 	FGameplayTag Abilities_Type_Offensive;
 	FGameplayTag Abilities_Type_Passive;
 	FGameplayTag Abilities_Type_None;
+
+	/*空技能标签*/
+	FGameplayTag Abilities_None;
 	
 	/*Aura Ability Tag*/
 	FGameplayTag Abilities_Fire_FireBolt;

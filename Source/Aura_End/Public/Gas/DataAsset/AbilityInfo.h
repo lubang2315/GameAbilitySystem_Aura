@@ -28,6 +28,10 @@ struct FAuraAbilityInfo
 	/*技能冷却标签*/
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	FGameplayTag CoolDownTag = FGameplayTag();
+
+	/*技能类型标签*/
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	FGameplayTag AbilityTypeTag = FGameplayTag();
 	
 	/*技能图标*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

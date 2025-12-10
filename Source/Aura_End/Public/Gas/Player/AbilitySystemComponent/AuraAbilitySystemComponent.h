@@ -16,7 +16,9 @@ DECLARE_MULTICAST_DELEGATE(FAbilityGiven)
 /*遍历已经激活的技能*/
 DECLARE_DELEGATE_OneParam(FForEachAbility,const FGameplayAbilitySpec&)
 /*广播技能解锁状态*/
-DECLARE_MULTICAST_DELEGATE_TwoParams(FAbilityStatusChanged,const FGameplayTag& /*技能标签*/,const FGameplayTag& /*解锁状态标签*/)
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged,const FGameplayTag& /*AbilityTag*/ ,const FGameplayTag&  /*StatusTag*/,int32 /*level*/)
+/*技能装配委托*/
+DECLARE_MULTICAST_DELEGATE_FourParams(FAbilityEquip,const FGameplayTag& /*技能标签*/,const FGameplayTag& /*技能状态标签*/,const FGameplayTag& /*技能输入插槽Slot标签*/,const FGameplayTag& /*上一个输入插槽标签*/)
 
 UCLASS()
 class AURA_END_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
@@ -36,6 +38,9 @@ public:
 	/*技能解锁状态更新委托*/
 	FAbilityStatusChanged AbilityStatusChangedDelegate;
 
+	/*技能装备到技能栏委托*/
+	FAbilityEquip AbilityEquipDelegate;
+	
 	/*添加能力，注意能力在添加后要使用还要激活 *ActivateGA**/
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
 
@@ -57,6 +62,9 @@ public:
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 
+	FGameplayTag GetStatusFromAbilityTag(const FGameplayTag& AbilityTag);
+	FGameplayTag GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag);
+	
 	/*通过技能标签获取已经创建的技能*/
 	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& GameplayTag);
 
@@ -70,13 +78,37 @@ public:
 	/*服务器运行，消耗属性点升级属性*/
 	UFUNCTION(Server,Reliable)
 	void ServerUpGradeAttribute(const FGameplayTag& AttributeTag);
+
+	/*服务器运行花费技能点升级技能等级*/
+	UFUNCTION(Server,Reliable)
+	void ServerSpendSpellPoints(const FGameplayTag& AttributeTag);
+
+	/*通过技能标签获取描述*/
+	bool GetDescrptionByAbilityTag(const FGameplayTag& AbilityTag,FString& OutLevelDescription,FString& OutNextLevelDescription);
+
+	/*在服务器处理技能装配*/
+	UFUNCTION(Server,Reliable)
+	void ServerEquipAbility(const FGameplayTag& SlotTag,const FGameplayTag& AbilityTag);
+
+	/*在客户端处理技能装配*/
+	UFUNCTION(Client,Reliable)
+	void ClientEquipAbility(const FGameplayTag& SlotTag,const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag,const FGameplayTag& PreviousTag);
+
+	/*清除技能插槽标签，也可以说清除技能装备栏技能球装备的技能*/
+	void ClealSlot(FGameplayAbilitySpec* Spec);
+
+	/*如果技能已经装备，并且需要在装备栏移动位置，那就需要先清除原先插槽技能，所以根据插槽标签清除技能插槽技能*/
+	void ClealAbilityOfSlot(const FGameplayTag& SlotTag);
+
+	/*用来判断技能属主动还是被动技能类型*/
+	static bool AbilityHasSlot(FGameplayAbilitySpec* Spec,const FGameplayTag& Slot);
 	
 protected:
 	UFUNCTION(Client, reliable)
     void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle);
 
 	UFUNCTION(Client, reliable)
-	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag);
+	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag,int32 NewLevel);
 	
 };
 

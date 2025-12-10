@@ -8,6 +8,7 @@
 #include "Actor/Auraprojectile.h"
 #include "Tags/AuraGameplayTags.h"
 #include "Interface/CombotInterface.h"
+
 /*激活技能*/
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                            const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
@@ -60,9 +61,6 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 					const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
 					UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,Pair.Key,ScaledDamage);
 				}
-		
-		       
-		        
 		
         		Projectile->DamageEffectHandle = SpecHandle;
 		

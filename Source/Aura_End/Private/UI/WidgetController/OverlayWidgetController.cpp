@@ -6,6 +6,7 @@
 #include "Gas/DataAsset/LevelUpInfo.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
+#include "Tags/AuraGameplayTags.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
@@ -33,6 +34,9 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 	if (GetAuraAbilitySystemComponent())
 	{
+		/*绑定AuraASC里面技能栏技能更改后的信息*/
+		GetAuraAbilitySystemComponent()->AbilityEquipDelegate.AddUObject(this,&UOverlayWidgetController::OnAbilityEquipped);
+		
 		if (GetAuraAbilitySystemComponent()->bStartupAbilityGiven)
 		{
 			BroadcastAbilityInfo();
@@ -81,5 +85,23 @@ void UOverlayWidgetController::OnXPChanged(int32 NewXP)
 		OnXPChangedDelegate.Broadcast(ProgressBarXP);
 	}
 	
+}
+
+void UOverlayWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag,const FGameplayTag& SlotTag, const FGameplayTag& PreviousTag)
+{
+	/*主要是广播两个数据，一个是清除已经装备的技能数据，一个是广播新要装在的数据*/
+
+	const FMyGameplayTags GameplayTags = FMyGameplayTags::Get();
+
+	FAuraAbilityInfo LastSlotInfo;
+	LastSlotInfo.StatusTag = GameplayTags.Abilities_Status_Unlocked;
+	LastSlotInfo.InputTag = PreviousTag;
+	LastSlotInfo.AbilityTag = GameplayTags.Abilities_None;
+	AbilityInfoDelegate.Broadcast(LastSlotInfo);
+
+	FAuraAbilityInfo NewAbilityInfo = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+	NewAbilityInfo.StatusTag = StatusTag;
+	NewAbilityInfo.InputTag = SlotTag;
+	AbilityInfoDelegate.Broadcast(NewAbilityInfo);
 }
 
