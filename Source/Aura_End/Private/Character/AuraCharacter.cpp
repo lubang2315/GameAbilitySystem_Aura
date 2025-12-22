@@ -175,6 +175,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 	 }
 	}
 	InitializePrimaryAttributes();
+	OnASCRegistered.Broadcast(AbilitySystemComponent);
 }
 
 int32 AAuraCharacter::GetPlayerLevel_Implementation()

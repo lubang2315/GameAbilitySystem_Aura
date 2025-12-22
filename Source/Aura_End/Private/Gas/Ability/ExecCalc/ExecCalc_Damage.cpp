@@ -9,6 +9,7 @@
 #include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
 #include "Interface/CombotInterface.h"
+#include "Math/UnitConversion.h"
 #include "Tags/AuraGameplayTags.h"
 
 struct SDamageStruct
@@ -25,12 +26,11 @@ struct SDamageStruct
 	DECLARE_ATTRIBUTE_CAPTUREDEF(ArcaneResistance);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(PhysicalResistance);
 
-	/*创建一个Map，通过标签映射捕获的属性*/
-	TMap<FGameplayTag,FGameplayEffectAttributeCaptureDefinition> TagstoCaptureDefs;
+	
 	
 	SDamageStruct()
 	{
-		/*2*Define Parameter,定义参数。设置从Aura那里或去Armor的属性，同时设置通目标身上获取，在创建时不进行属性快照，激活时才进行快照*/
+		/*2*Define Parameter,定义参数。设置从Aura那里获取Armor的属性，同时设置通目标身上获取，在创建时不进行属性快照，激活时才进行快照*/
 		/*四个参数：获取属性的地方，获取的属性，获取的是谁的属性，是否在创建时进行属性快照，否在激活时进行属性快照*/
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,Armor,Target,false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,ArmorPenetratinon,Target,false);
@@ -43,19 +43,7 @@ struct SDamageStruct
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,ArcaneResistance,Target,false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,PhysicalResistance,Target,false);
 
-		
-		/*Add映射*/
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_Armor,ArmorDef);
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_ArmorPenetration,ArmorPenetratinonDef);
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_BlockChance,blockChanceDef);
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CriticalHitChance,CriticalHitChanceDef);
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CritiaclHitDamage,CriticalHitDamageDef);
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CritialHitResistance,CriticalHitResistanceDef);
-		
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Fire,FireResistanceDef);
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Lightning,LightningResistanceDef);
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Arcane,ArcaneResistanceDef);
-		TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Physical,PhysicalResistanceDef);
+	
 	}
 };
 
@@ -87,9 +75,75 @@ UExecCalc_Damage::UExecCalc_Damage()
 	
 }
 
+void UExecCalc_Damage::DetermineDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams, const FGameplayEffectSpec& Spec, FAggregatorEvaluateParameters EvaluateParam,const TMap<FGameplayTag,FGameplayEffectAttributeCaptureDefinition>& TagstoCaptureDefs) const
+{
+	const FMyGameplayTags& MyGameplayTags = FMyGameplayTags::Get();
+
+	for (auto& pair : MyGameplayTags.DamageTypeToDebuff)
+	{
+		FGameplayTag DamagetType = pair.Key;
+		const FGameplayTag DebuffType = pair.Value;
+		/*根据标签获取负面效果数值*/
+		const float DebuffValue = Spec.GetSetByCallerMagnitude(DamagetType,false,-1.f);
+		/*判断一下如果没找到标签绑定的Debuff默认输出-1.f*/
+		if (DebuffValue > -0.5f)
+		{
+			/*获取Debuff触发成功的几率*/
+			const float DebuffChance = Spec.GetSetByCallerMagnitude(MyGameplayTags.Debuff_Chance,false,-1.f);
+			/*本地化一个技能作用目标阻止效果成功的概率*/
+			float TargetDebuffResistance = 0.f;
+			/*捕获Debuff抗性参数*/
+			const FGameplayTag& ResistanceTag = MyGameplayTags.DamageTypesToResistance[DamagetType];
+			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(TagstoCaptureDefs[ResistanceTag],EvaluateParam,TargetDebuffResistance);
+			TargetDebuffResistance = FMath::Max<float>(TargetDebuffResistance,0.f);
+			/*计算Debuff应用成功率*/
+			float EffectiveDebuffChance = DebuffChance*(100.f-TargetDebuffResistance)/100.f;
+			const bool bDebuff = FMath::RandRange(1,100) < EffectiveDebuffChance;
+			if (bDebuff)
+			{
+				/*获取上下文*/
+				FGameplayEffectContextHandle EffectContext = Spec.GetEffectContext();
+
+				/*设置成功触发Debuff*/
+				UMyFunctionLibrary::SetIsSuccessfulDebuff(EffectContext,true);
+				
+				/*获取Debuff持续时间，触发频率,伤害*/
+				const float Duration = Spec.GetSetByCallerMagnitude(MyGameplayTags.Debuff_Duration,false,-1.f);
+				const float Frequency = Spec.GetSetByCallerMagnitude(MyGameplayTags.Debuff_Frequency,false,-1.f);
+				const float Damage = Spec.GetSetByCallerMagnitude(MyGameplayTags.Debuff_Damage,false,-1.f);
+
+				
+				/*设置负面效果的类型，伤害，持续时间，触发频率*/
+				UMyFunctionLibrary::SetDebuffType(EffectContext,DamagetType);
+				UMyFunctionLibrary::SetDebuffDuration(EffectContext,Duration);
+				UMyFunctionLibrary::SetDebuffFrequency(EffectContext,Frequency);
+				UMyFunctionLibrary::SetDebuffDamage(EffectContext,Damage);
+			}
+
+		}
+	}
+}
+
 void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
                                               FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
 {
+
+	/*创建一个Map，通过标签映射捕获的属性*/
+	TMap<FGameplayTag,FGameplayEffectAttributeCaptureDefinition> TagstoCaptureDefs;
+	
+	/*Add映射*/
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_Armor,DamageStruct().ArmorDef);
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_ArmorPenetration,DamageStruct().ArmorPenetratinonDef);
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_BlockChance,DamageStruct().blockChanceDef);
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CriticalHitChance,DamageStruct().CriticalHitChanceDef);
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CritiaclHitDamage,DamageStruct().CriticalHitDamageDef);
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Secondery_CritialHitResistance,DamageStruct().CriticalHitResistanceDef);
+		
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Fire,DamageStruct().FireResistanceDef);
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Lightning,DamageStruct().LightningResistanceDef);
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Arcane,DamageStruct().ArcaneResistanceDef);
+	TagstoCaptureDefs.Add(FMyGameplayTags::Get().Attributes_Resistance_Physical,DamageStruct().PhysicalResistanceDef);
+	
 	/*先获取GAS和Actor*/
 	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
  	const UAbilitySystemComponent* TagrgetASC = ExecutionParams.GetTargetAbilitySystemComponent();
@@ -170,16 +224,19 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	const float CriticalHitResistanceCoefficient = CriticalHitResistanceCurve->Eval(TargetLevel);
 
 	/*自定义计算属性区域*/
+	/*Debuff*/
+	DetermineDebuff(ExecutionParams, Spec, EvaluateParam,TagstoCaptureDefs);
+
+	
 	/*护甲属性计算*/
 	const float EffectiveArmor = blockChance*(100.f - ArmorPenetratinon*ArmorPenetrationCoefficient)/100.f;
-
-
+	
 	float Damage = 0.f;
 	for (auto& pair : FMyGameplayTags::Get().DamageTypesToResistance)
 	{
 
 		const FGameplayTag ResistanceTag = pair.Value;
-		FGameplayEffectAttributeCaptureDefinition CaptureDefinition = SDamageStruct().TagstoCaptureDefs[ResistanceTag];
+		FGameplayEffectAttributeCaptureDefinition CaptureDefinition = TagstoCaptureDefs[ResistanceTag];
 
 		float DamageTypeValue = Spec.GetSetByCallerMagnitude(pair.Key,false);
 

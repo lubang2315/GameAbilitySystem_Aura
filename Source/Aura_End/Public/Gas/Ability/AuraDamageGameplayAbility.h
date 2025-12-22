@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AuraAbilityTypes.h"
 #include "Gas/Ability/AuraGameplayAbility.h"
 #include "Interface/CombotInterface.h"
 #include "AuraDamageGameplayAbility.generated.h"
@@ -15,20 +16,54 @@ class AURA_END_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 {
 	GENERATED_BODY()
 
+public:
+	/*创建负面影响相关参数结构体*/
+	FDamageEffectPrams MakeDamageEffectPramsFromClassDefault(AActor* TargetActor = nullptr) const;
+
 protected:
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> DamageEffectClass ;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Combot")
-	TMap<FGameplayTag, FScalableFloat> DamageTypes;
 
+	/*伤害类型*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FGameplayTag DamageType;
+
+	/*伤害数值*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FScalableFloat Damage;
+
+	/*触发负面影响的几率*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float DebuffChance = 20.f;
+	
+	/*负面影响伤害数值*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float DebuffDamage = 5.f;
+	
+	/*负面伤害触发间隔时间*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float DebuffFrequency = 1.f;
+	
+	/*负面影响持续时间*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float DebuffDurations = 1.f;
+	
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* TargetActor);
 
 	UFUNCTION(BlueprintPure)
 	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontageArray) const;
 
-	/*根据伤害类型获取伤害值*/
-	float GetDamageByDamageType(int32 InLevel,const FGameplayTag& DamageTag);
+	/*被技能击中并造成致命一击被弹飞的强度*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float DeathImpulseMagnitude = 60.f;
+
+	/*被技能击中并造成击飞的概率*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float KnockBackChance = 60.f;
+
+	/*被技能击中并造成击飞的概率*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float KnockBackMagnitude = 60.f;
 };

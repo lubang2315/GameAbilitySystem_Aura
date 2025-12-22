@@ -47,12 +47,12 @@ void AAuraprojectile::BeginPlay()
 void AAuraprojectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!DamageEffectHandle.Data.IsValid() || DamageEffectHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
-	{
-		return;
-	}
+	AActor* SourceActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	/*判断火球是不是击中自己*/
+	if (SourceActor == OtherActor) return;
+
 	/*判断伤害的是不是友军*/
-	if (!UMyFunctionLibrary::ISNotFriend(DamageEffectHandle.Data.Get()->GetContext().GetEffectCauser(),OtherActor)) return;
+	if (!UMyFunctionLibrary::ISNotFriend(SourceActor,OtherActor)) return;
 	
 	if (!bHit)
 	{
@@ -64,7 +64,20 @@ void AAuraprojectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	{
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
-			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectHandle.Data.Get());
+			/*获取致命一击的方向和力度*/
+			const FVector Deathimpulse = GetActorForwardVector() * DamageEffectParams.DeathImpulseMagnitude;
+			DamageEffectParams.DeathImpulse = Deathimpulse;
+
+			/*获取在成工触发下的击飞的方向和力度*/
+			if (const bool bKnockBack = FMath::RandRange(1,100) < DamageEffectParams.KnockBackChance)
+			{
+				/*将击飞的方向向上偏转，实现向上向前的抛物线击飞效果*/
+				const FVector KnockBackDirection = GetActorForwardVector().RotateAngleAxis(-45.f,GetActorRightVector());
+				DamageEffectParams.KnockBackForce = KnockBackDirection * DamageEffectParams.KnockBackMagnitude;
+			}
+			
+			DamageEffectParams.TargetAbilitySystemComponent = TargetASC;
+			UMyFunctionLibrary::ApplyGameplayEffect(DamageEffectParams);
 		}
 		Destroy();
 	}

@@ -9,6 +9,7 @@
 #include "UObject/Interface.h"
 #include "CombotInterface.generated.h"
 
+class UAbilitySystemComponent;
 class UNiagaraSystem;
 class UAnimMontage;
 
@@ -35,6 +36,9 @@ struct  FTaggedMontage
 	USoundBase* ImpactSound = nullptr;
 };
 
+/*委托*/
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered,UAbilitySystemComponent*)//传递ASC是否初始化完成
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath,AActor*,DeadActor);//传递Actor死亡
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI,BlueprintType)
@@ -65,7 +69,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 	UAnimMontage* GetAnimMontage();
 	
-	virtual void Die() = 0;
+	virtual void Die(const FVector& DeathImpulse) = 0;
 
 	/*传递Character状态*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
@@ -97,4 +101,10 @@ public:
 	/*获取敌人类型*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	ECharacterClass GetCharacterClass();
+
+	/*获取ASC注册成功后的委托*/
+	virtual FOnASCRegistered& GetASCRegistered() = 0;
+
+	/*获取Actor死亡委托*/
+	virtual FOnDeath& GetDeath() = 0;
 };

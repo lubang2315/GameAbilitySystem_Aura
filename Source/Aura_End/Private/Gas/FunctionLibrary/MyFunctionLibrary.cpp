@@ -3,11 +3,13 @@
 
 #include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AuraAbilityTypes.h"
 #include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Character/AuraGameModeBase.h"
 #include "Interface/CombotInterface.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tags/AuraGameplayTags.h"
 #include "UI/HUD/AuraHUDBase.h"
 #include "UI/WidgetController/AuraWidgetController.h"
 
@@ -166,7 +168,7 @@ bool UMyFunctionLibrary::IsCriticalHit(const FGameplayEffectContextHandle& Effec
 	return false;
 }
 
-inline void UMyFunctionLibrary::SetIsBlockHit(FGameplayEffectContextHandle& EffectContextHandle, bool IsBlockHit)
+void UMyFunctionLibrary::SetIsBlockHit(FGameplayEffectContextHandle& EffectContextHandle, bool IsBlockHit)
 {
 	
 	FAuraGameplayEffectContext* AuraGameplayEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
@@ -174,7 +176,7 @@ inline void UMyFunctionLibrary::SetIsBlockHit(FGameplayEffectContextHandle& Effe
 	
 }
 
-inline void UMyFunctionLibrary::SetIsCriticalHit(FGameplayEffectContextHandle& EffectContextHandle,bool IsCriticalHitHit)
+void UMyFunctionLibrary::SetIsCriticalHit(FGameplayEffectContextHandle& EffectContextHandle,bool IsCriticalHitHit)
  {
  
  	FAuraGameplayEffectContext* AuraGameplayEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
@@ -217,6 +219,40 @@ bool UMyFunctionLibrary::ISNotFriend(AActor* FirstActor, AActor* SecondActor)
 	return !bFriends;
 }
 
+FGameplayEffectContextHandle UMyFunctionLibrary::ApplyGameplayEffect(const FDamageEffectPrams& DamageEffectPrams)
+{
+	/*获取标签*/
+	FMyGameplayTags MyGameplayTags = FMyGameplayTags::Get();
+	
+	/*获取源对象*/
+	const AActor* SourceActor = DamageEffectPrams.SourceAbilitySystemComponent->GetAvatarActor();
+	
+	/*创建上下文句柄*/
+	FGameplayEffectContextHandle EffectContextHandle = DamageEffectPrams.SourceAbilitySystemComponent->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(SourceActor);
+
+	/*设置致命一击方向*/
+	SetDeathImpulse(EffectContextHandle,DamageEffectPrams.DeathImpulse);
+
+	/*设置击飞方向*/
+	SetKnockBackForce(EffectContextHandle,DamageEffectPrams.KnockBackForce);
+
+	/*创建GE规格句柄*/
+	FGameplayEffectSpecHandle SpecHandle = DamageEffectPrams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectPrams.DamageGameplayEffectClass,DamageEffectPrams.AbilityLevel,EffectContextHandle);
+
+	/*配置规格里面的具体参数*/
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,DamageEffectPrams.DamageType,DamageEffectPrams.BaseDamage);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,MyGameplayTags.Debuff_Chance,DamageEffectPrams.DebuffChance);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,MyGameplayTags.Debuff_Damage,DamageEffectPrams.DebuffDamage);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,MyGameplayTags.Debuff_Frequency,DamageEffectPrams.DebuffFrequency);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,MyGameplayTags.Debuff_Duration,DamageEffectPrams.DebuffDuration);
+
+	/*讲GE应用给目标*/
+	DamageEffectPrams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	return EffectContextHandle;
+	
+}
+
 int32 UMyFunctionLibrary::GetXPRewardForClassAndLevel(const UObject* WorldContextObject, int32 Level,ECharacterClass CharacterClass)
 {
 	/*从世界上下文对象中获得游戏模式然后从游戏模式中获得数据资产*/
@@ -228,3 +264,127 @@ int32 UMyFunctionLibrary::GetXPRewardForClassAndLevel(const UObject* WorldContex
 
 	return  static_cast<float>(XPReward);
 }
+
+bool UMyFunctionLibrary::GetIsSuccessfulDebuff(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetIsSuccessfulDebuff();
+	}
+	return false;
+}
+
+float UMyFunctionLibrary::GetDebuffDamage(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetDebuffDamage();
+	}
+	return 0.f;
+}
+
+float UMyFunctionLibrary::GetDebuffFrequency(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetDebuffFrequency();
+	}
+	return 0.f;
+}
+
+float UMyFunctionLibrary::GetDebuffDuration(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetDebuffDuration();
+	}
+	return 0.f;
+	
+}
+FGameplayTag UMyFunctionLibrary::GetDebuffType(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		if (GEContextHandle->GetDamageType().IsValid())
+		{
+			return *GEContextHandle->GetDamageType();
+		}
+	}
+	return FGameplayTag();
+}
+
+void UMyFunctionLibrary::SetIsSuccessfulDebuff(FGameplayEffectContextHandle& EffectContextHandle,bool IsSuccessfulDebuff)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetIsSuccessfulDebuff(IsSuccessfulDebuff);
+	}
+}
+
+void UMyFunctionLibrary::SetDebuffDamage(FGameplayEffectContextHandle& EffectContextHandle,float DebuffDamage)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetDebuffDamage(DebuffDamage);
+	}
+}
+
+void UMyFunctionLibrary::SetDebuffFrequency(FGameplayEffectContextHandle& EffectContextHandle,float DebuffFrequency)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetDebuffFrequency(DebuffFrequency);
+	}
+}
+
+void UMyFunctionLibrary::SetDebuffDuration(FGameplayEffectContextHandle& EffectContextHandle,float DebuffDuration)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetDebuffDuration(DebuffDuration);
+	}
+}
+
+void UMyFunctionLibrary::SetDebuffType(FGameplayEffectContextHandle& EffectContextHandle,FGameplayTag& DamagetDebuffType)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		const TSharedPtr<FGameplayTag> DamageType = MakeShared<FGameplayTag>(DamagetDebuffType);
+		GEContextHandle->SetDamageType(DamageType);
+	}
+}
+
+FVector UMyFunctionLibrary::GetDeathImpulse(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetDeathImpulse();
+	}
+	return FVector::ZeroVector;
+}
+
+void UMyFunctionLibrary::SetDeathImpulse(FGameplayEffectContextHandle& EffectContextHandle,const FVector& DeathImpluse)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetDeathImpulse(DeathImpluse);
+	}
+}
+
+FVector UMyFunctionLibrary::GetKnockBackForce(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetKnockBackForce();
+	}
+	return FVector::ZeroVector;
+}
+
+void UMyFunctionLibrary::SetKnockBackForce(FGameplayEffectContextHandle& EffectContextHandle,const FVector& KnockBackForce)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetKonckBackForce(KnockBackForce);
+	}
+}
+

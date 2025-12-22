@@ -35,7 +35,7 @@ public:
 
 	virtual void InitializePrimaryAttributes() const override;
 
-	virtual void Die() override;
+	virtual void Die(const FVector& DeathImpulse) override;
 
 	/*传递Enemy攻击目标*/
 	UPROPERTY(BlueprintReadWrite,Category="Combat")

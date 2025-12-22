@@ -9,6 +9,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MyFunctionLibrary.generated.h"
 
+struct FDamageEffectPrams;
 class USpellMenuWidgetController;
 class UAttributeMenuWidgetController;
 class UOverlayWidgetController;
@@ -70,11 +71,77 @@ public:
 	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
 	static bool ISNotFriend(AActor* FirstActor,AActor* SecondActor);
 
+	/*根据传入的负面影响参数生产GE并应用*/
+	static FGameplayEffectContextHandle ApplyGameplayEffect(const FDamageEffectPrams& DamageEffectPrams);
+
 	/*根据敌人类型和等级返回相应的XP值*/
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharacterClassDefaults")
 	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject,int32 Level,ECharacterClass CharacterClass);
+
+	/*Debuff*/
+	/*获取是否成功应用负面影响*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static bool GetIsSuccessfulDebuff(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*获取负面影响值*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static float GetDebuffDamage(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*获取负面影响频率*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static float GetDebuffFrequency(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*获取负面影响持续时间*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static float GetDebuffDuration(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*获取负面影响类型标签*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static FGameplayTag GetDebuffType(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*设置是否成功应用负面影响*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetIsSuccessfulDebuff(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,bool IsSuccessfulDebuff);
+
+	/*设置负面影响值*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetDebuffDamage(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,float DebuffDamage);
+
+	/*设置负面影响频率*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetDebuffFrequency(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,float DebuffFrequency);
+
+	/*设置负面影响持续时间*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetDebuffDuration(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,float DebuffDuration);
+
+	/*设置负面影响持续时间*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetDebuffType(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,FGameplayTag& DamagetDebuffType);
+
+	/*获取致命一击一击时攻击的方向和力度*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static FVector GetDeathImpulse(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*设置致命一击的攻击方向和力度*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetDeathImpulse(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,const FVector& DeathImpluse);
+
+	/*获取击飞时攻击的方向和力度*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static FVector GetKnockBackForce(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*设置击飞的攻击方向和力度*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetKnockBackForce(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,const FVector& KnockBackForce);
+
+
 	
+	/*End*/
+
 };
+
+
 
 
 

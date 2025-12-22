@@ -239,6 +239,16 @@ private:
 	/*用来辅助是否重置血量蓝量*/
 	bool bFillHealth = false;
 	bool bFillMana = false;
+
+	/*当传入的为伤害属性进行处理的逻辑*/
+	void HandelIncomingDamage(const FEffectPropreties& Props);
+
+	/*当传入的为经验属性进行处理的逻辑*/
+	void HandelIncomingXP(const FEffectPropreties& Props);
+
+	/*如果伤害触发负面效果进行处理的逻辑*/
+	void HandelDebuff(const FEffectPropreties& Props);
+	
 };
 
 

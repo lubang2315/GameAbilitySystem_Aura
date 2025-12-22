@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "Aura_End/Aura_End.h"
 #include "Components/CapsuleComponent.h"
+#include "Gas/Debuff/DebuffNiagaraComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tags/AuraGameplayTags.h"
@@ -15,6 +16,11 @@ AAuraCharacterBase::AAuraCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	/*设置Debuff的Niagara附着在跟骨骼以及标签*/
+	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("DebuffNiagara");
+	BurnDebuffComponent->SetupAttachment(GetRootComponent());
+	BurnDebuffComponent->DebuffTag = FMyGameplayTags::Get().Debuff_Burn;
 
 	//1.创建一个骨骼网格体实例
 	//2.实例的插槽名称为WeaponHandSocket通过GetMesh（）附着在人物网格体下面
@@ -41,14 +47,14 @@ UAnimMontage* AAuraCharacterBase::GetAnimMontage_Implementation()
 	return HitReactMontage;
 }
 
-void AAuraCharacterBase::Die()
+void AAuraCharacterBase::Die(const FVector& DeathImpulse)
 {
 	/*敌人死亡设置武器脱手*/
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
-	MultCastHandleDeath();
+	MultCastHandleDeath(DeathImpulse);
 }
 
-void AAuraCharacterBase::MultCastHandleDeath_Implementation()
+void AAuraCharacterBase::MultCastHandleDeath_Implementation(const FVector& DeathImpulse)
 {
 	/*play Death Sound*/
 	UGameplayStatics::SpawnSoundAtLocation(this,DeathSound,GetActorLocation(),GetActorRotation());
@@ -57,12 +63,14 @@ void AAuraCharacterBase::MultCastHandleDeath_Implementation()
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	Weapon->AddImpulse(DeathImpulse * 0.1f,NAME_None,true);
 
 	/*开启角色物理效果*/
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic,ECR_Block);
+	GetMesh()->AddImpulse(DeathImpulse,NAME_None,true);
 
 	/*关闭角色碰撞体碰撞通道，避免死亡尸体影响*/
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -71,6 +79,9 @@ void AAuraCharacterBase::MultCastHandleDeath_Implementation()
 	Dissolve();
 	
 	bDead = true;
+
+	/*广播死亡事件*/
+	OnDeath.Broadcast(this);
 }
 
 TArray<FTaggedMontage> AAuraCharacterBase::GetTaggedMontages_Implementation()
@@ -103,6 +114,16 @@ int32 AAuraCharacterBase::GetMinionCount_Implementation()
 void AAuraCharacterBase::SetMinionCount_Implementation(int32 Amount)
 {
 	MinionCount += Amount;
+}
+
+FOnASCRegistered& AAuraCharacterBase::GetASCRegistered()
+{
+	return OnASCRegistered;
+}
+
+FOnDeath& AAuraCharacterBase::GetDeath()
+{
+	return OnDeath;
 }
 
 ECharacterClass AAuraCharacterBase::GetCharacterClass_Implementation()

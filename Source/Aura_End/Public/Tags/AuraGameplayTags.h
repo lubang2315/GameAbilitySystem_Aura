@@ -55,6 +55,21 @@ public:
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Arcane;
 	FGameplayTag Attributes_Resistance_Physical;
+
+	/*负面效果标签:火—燃烧，雷—眩晕，魔法—法伤，物理—流血*/
+	FGameplayTag Debuff_Burn;
+	FGameplayTag Debuff_Stun;
+	FGameplayTag Debuff_Arcane;
+	FGameplayTag Debuff_Physical;
+
+	/*负面效果参数标签，负面效果触发概率，负面效果伤害，负面效果触发间隔，负面效果持续时间*/
+	FGameplayTag Debuff_Chance;
+	FGameplayTag Debuff_Damage;
+	FGameplayTag Debuff_Frequency;
+	FGameplayTag Debuff_Duration;
+
+	/*添加一个Map用来映射负面效果和属性抗性标签*/
+	TMap<FGameplayTag, FGameplayTag> DamageTypeToDebuff;
 	
 	/*这里创建了一个数组，在设置完有调用者计算伤害时，存在多种属性传递，接收者是按照标签接受属性值，
 	 * 以前的方法是一个个找到标签在读取属性值，这样比较麻烦，这里直接创建一个数组，把要读取的属性

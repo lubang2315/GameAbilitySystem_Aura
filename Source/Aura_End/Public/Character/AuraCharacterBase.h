@@ -10,6 +10,7 @@
 #include "Interface/CombotInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UDebuffNiagaraComponent;
 class UNiagaraSystem;
 class AbilitySystemComponent;
 class AttributeSet;
@@ -25,7 +26,7 @@ public:
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;}
 
 	UFUNCTION(NetMulticast,Reliable)
-	virtual void MultCastHandleDeath();
+	virtual void MultCastHandleDeath(const FVector& DeathImpulse);
 
 	/*IcombotInterface*/
 	
@@ -33,7 +34,7 @@ public:
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag)const override;
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
-	virtual void Die() override;
+	virtual void Die(const FVector& DeathImpulse) override;
 	
 	/*创建一个容器，方便敌人近战模版的泛用性，因为有拿武器和不拿武器的小兵，并且有左右手切换攻击的类型，保证泛用性，这里创建容器把标签和蒙太奇关联*/
 	UPROPERTY(EditAnywhere,Category="Combat")
@@ -51,9 +52,20 @@ public:
 
 	/*设置随从数量*/
 	virtual void SetMinionCount_Implementation(int32 Amount) override;
+
+	/*ASC注册成功委托*/
+	virtual FOnASCRegistered& GetASCRegistered() override;
+
+	/*Actor死亡委托*/
+	virtual FOnDeath& GetDeath() override;
 	
 	/*End*/
 
+	/*ASC注册成功委托*/
+	FOnASCRegistered OnASCRegistered;
+	/*Actor死亡委托*/
+	FOnDeath OnDeath;
+	
 	/*设置人物类型*/
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
 	ECharacterClass CharacterClass = ECharacterClass::Warrior;
@@ -136,6 +148,10 @@ protected:
 
 	/*召唤随从数量*/
 	int32 MinionCount = 0;
+
+	/*设置Debuff的Niagara特效*/
+	UPROPERTY(visibleAnywhere)
+	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
 	
 private:
 	/*AuraGA*/

@@ -84,6 +84,10 @@ void AAuraEnemy::InitAbilityActorInfo()
    //初始化能力系统
       AbilitySystemComponent->InitAbilityActorInfo(this,this);
       Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+
+    /*ASC初始化成功广播给Niagara系统*/
+    OnASCRegistered.Broadcast(AbilitySystemComponent);
+    
     if (HasAuthority())
     {
     InitializePrimaryAttributes();
@@ -153,14 +157,14 @@ void AAuraEnemy::InitializePrimaryAttributes() const
    UMyFunctionLibrary::InitializeDefaultAttribute(Level,CharacterClass,AbilitySystemComponent,this);
 }
 
-void AAuraEnemy::Die()
+void AAuraEnemy::Die(const FVector& DeathImpulse)
 {
     SetLifeSpan(LifeSpan);
     if (AuraAIController)
     {
         AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"),true);
     }
-    Super::Die();
+    Super::Die(DeathImpulse);
 }
 
 void AAuraEnemy::SetCombotTarget_Implementation(AActor* CombotTarget)
