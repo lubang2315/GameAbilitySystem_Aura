@@ -388,3 +388,57 @@ void UMyFunctionLibrary::SetKnockBackForce(FGameplayEffectContextHandle& EffectC
 	}
 }
 
+TArray<FRotator> UMyFunctionLibrary::EvenlySpacedRotators(const FVector& ForWard, const FVector& Axis, float Spread,int32 NumRotators)
+{
+	/*新建一个输出数组*/
+	TArray<FRotator> Rotators;
+
+	/*获取最左侧开始计算分段的初始角度*/
+	const FVector LeftOfSpread = ForWard.RotateAngleAxis(-Spread / 2.f, Axis);
+
+	/*根据分段不同决定是否进行均分*/
+	if (NumRotators > 1)
+	{
+		/*根据均分段数获取均分角度*/
+		const float DeltaSpread = Spread / NumRotators - 1.f;
+		for (int32 i = 0; i < NumRotators; i++)
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector);
+			Rotators.Add(Direction.Rotation());
+		}
+	}
+	else
+	{
+		/*如果只有一个均分那只返回正前方向即可*/
+		Rotators.Add(ForWard.Rotation());
+	}
+	return Rotators;
+}
+
+TArray<FVector> UMyFunctionLibrary::EvenlySpacedVectors(const FVector& ForWard, const FVector& Axis, float Spread,int32 NumRotators)
+{
+	/*新建一个输出数组*/
+	TArray<FVector> Vectors;
+
+	/*获取最左侧开始计算分段的初始角度*/
+	const FVector LeftOfSpread = ForWard.RotateAngleAxis(-Spread / 2.f, Axis);
+
+	/*根据分段不同决定是否进行均分*/
+	if (NumRotators > 1)
+	{
+		/*根据均分段数获取均分角度*/
+		const float DeltaSpread = Spread / NumRotators - 1.f;
+		for (int32 i = 0; i < NumRotators; i++)
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector);
+			Vectors.Add(Direction);
+		}
+	}
+	else
+	{
+		/*如果只有一个均分那只返回正前方向即可*/
+		Vectors.Add(ForWard);
+	}
+	return Vectors;
+}
+

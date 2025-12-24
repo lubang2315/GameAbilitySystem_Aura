@@ -134,11 +134,16 @@ public:
 	/*设置击飞的攻击方向和力度*/
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
 	static void SetKnockBackForce(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,const FVector& KnockBackForce);
-
-
-	
 	/*End*/
 
+	/*在一定角度范围内，通过传入均分份数均分角度并输出*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMechanics")
+	static TArray<FRotator> EvenlySpacedRotators(const FVector& ForWard/*正前方向*/,const FVector& Axis/*基于旋转的轴*/,float Spread /*角度范围*/,int32 NumRotators/*分段数*/); 
+
+	/*在一定角度范围内，通过传入均分份数均分角度并通过向量形式返回*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMechanics")
+	static TArray<FVector> EvenlySpacedVectors(const FVector& ForWard/*正前方向*/,const FVector& Axis/*基于旋转的轴*/,float Spread /*角度范围*/,int32 NumRotators/*分段数*/); 
+	
 };
 
 

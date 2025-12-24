@@ -10,6 +10,7 @@
 #include "AuraPlayerController.generated.h"
 
 
+class UNiagaraSystem;
 class UDamageTextComponent;
 class UAuraAbilitySystemComponent;
 class UInputAction;
@@ -98,4 +99,8 @@ private:
 
 	FHitResult HitResult;
 	/*End*/
+
+	/*鼠标点击移动特效*/
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraSystem> ClickNiagaraComponent;
 };

@@ -7,12 +7,14 @@
 #include "EnhancedInputComponent.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Input/AuraInputComponent.h"
 #include "Interface/EnemyInterface.h"
 #include "Tags/AuraGameplayTags.h"
 #include "GameFramework/Character.h"
 #include "UI/Widget/DamageTextComponent.h"
+
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -161,7 +163,8 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)/*释�
         				FollowTime = 0.f;
         				bTargeting = false;
         			}
-		
+					/*在鼠标点击地点生成特效*/
+        			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ClickNiagaraComponent,CachedDestination);
         		}
 	}
 }
