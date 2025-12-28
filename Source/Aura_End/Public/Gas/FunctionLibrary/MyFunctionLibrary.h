@@ -67,6 +67,10 @@ public:
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
 	static void GetLivePlayersWithinRadius(const UObject* WorldContextObject,float Radius,TArray<AActor*>& OutOverlappingActors,TArray<AActor*>& ActorsToIgnore,const FVector& SphereOrigin);
 
+	/*根据数量要求获取距离最近的几个目标Actor*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
+	static void GetClosestTargets(int32 MaxTarget,const FVector& Origin,const TArray<AActor*>& Actors,TArray<AActor*>& OutTargets);
+	
 	/*在敌人使用技能攻击玩家时，通过标签判断是不是友军从而避免误伤*/
 	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
 	static bool ISNotFriend(AActor* FirstActor,AActor* SecondActor);

@@ -54,6 +54,11 @@ void AAuraCharacterBase::Die(const FVector& DeathImpulse)
 	MultCastHandleDeath(DeathImpulse);
 }
 
+USkeletalMeshComponent* AAuraCharacterBase::GetWeapon_Implementation()
+{
+	return Weapon;
+}
+
 void AAuraCharacterBase::MultCastHandleDeath_Implementation(const FVector& DeathImpulse)
 {
 	/*play Death Sound*/

@@ -128,4 +128,11 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 	/*Meta Attributes Tags*/
 	GameplayTags.Attributes_Meta_InComingXP = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Meta.IncomingXP"),FString("元属性XP的标签"));
 
+	/*用于在激活技能时阻止激活其他不需要激活的技能,通过标签阻止输入，释放，长按，和光标射线*/
+	GameplayTags.Player_Block_InputPresseed = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Player.Block.InputPresseed"),FString("通过标签阻止按下按键操作"));
+	GameplayTags.Player_Block_InputReleased = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Player.Block.InputInputReleased"),FString("通过标签阻止释放按键操作"));
+	GameplayTags.Player_Block_InputHold = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Player.Block.InputHold"),FString("通过标签阻止长按按键操作"));
+	GameplayTags.Player_Block_CursorTrace = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Player.Block.CursorTrace"),FString("通过标签阻止光标射线追踪操作"));
+
+	
 }

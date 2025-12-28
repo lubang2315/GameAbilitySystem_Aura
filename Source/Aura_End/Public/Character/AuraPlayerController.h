@@ -64,7 +64,7 @@ private:
 	void CursorTrace();
 	TScriptInterface<IEnemyInterface> LastActor;
 	TScriptInterface<IEnemyInterface> ThisActor;
-
+	
 	/**回调函数，根据状态触发GA *ActivateGA**MouseMove*/
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);

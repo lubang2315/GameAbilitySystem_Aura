@@ -27,6 +27,11 @@ FDamageEffectPrams UAuraDamageGameplayAbility::MakeDamageEffectPramsFromClassDef
 	return Params;
 }
 
+float UAuraDamageGameplayAbility::GetDamageAtLevel()
+{
+	return Damage.GetValueAtLevel(GetAbilityLevel());
+}
+
 void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
 	/*创建一个GE*/

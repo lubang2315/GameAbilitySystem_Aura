@@ -4,7 +4,7 @@
 #include "Gas/AbilityTasks/TargetDataUnderMouse.h"
 
 #include "AbilitySystemComponent.h"
-
+#include "Aura_End/Aura_End.h"
 
 
  UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility)
@@ -45,9 +45,8 @@
   /*获取鼠标下的数据*/
   APlayerController* AuraPC = Ability->GetCurrentActorInfo()->PlayerController.Get();
   FHitResult CurssortHit;
-  AuraPC->GetHitResultUnderCursor(ECC_Visibility,false,CurssortHit);
+  AuraPC->GetHitResultUnderCursor(ECC_Target,false,CurssortHit);
   DrawDebugSphere(GetWorld(), CurssortHit.Location, 300, 100, FColor::Red);
-  GEngine->AddOnScreenDebugMessage(1,1,FColor::Red,FString::Printf(TEXT("11")));
  
 
   

@@ -50,6 +50,9 @@ public:
 	/*获取可激活技能自动在客户端调用下面函数，在这里用来绑定回调通知客户端触发技能信息UI*/
 	virtual void OnRep_ActivateAbilities() override;
 
+	/*雷电技能，前置瞄准而未释放阶段通知按键状态*/
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	
 	/*触发和结束两种状态下，激活GA和移除GA(因为结束输入操作不一定GA结束，GA可能作用更长时间，所以这里只做通知) *ActivateGA**/
 	void AbilityInputTagHold(const FGameplayTag GameplayTag);
 	void AbilityAssetTagReleased(const FGameplayTag GameplayTag);

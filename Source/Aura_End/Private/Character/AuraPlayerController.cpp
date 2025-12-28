@@ -85,6 +85,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 
 void AAuraPlayerController::AutoMove()
 {
+	
 	if(!bAutoRunning) return;
 	if (APawn* AuraPawn = GetPawn())
 	{
@@ -104,6 +105,16 @@ void AAuraPlayerController::AutoMove()
 //通过cursor光标重叠，高亮显示敌人
 void AAuraPlayerController::CursorTrace()
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FMyGameplayTags::Get().Player_Block_CursorTrace))
+	{
+		/*如果有些技能触发，需要阻止光标射线监测，在此通过标签即可阻止,同时清除相关操作*/
+		/*鼠标拾取比较费性能，在不需要时候阻止*/
+		if (ThisActor) ThisActor->UnHighLightActor();
+		if (LastActor) ThisActor->UnHighLightActor();
+		ThisActor =nullptr;
+		LastActor =nullptr;
+		return;
+	}
 	
 	GetHitResultUnderCursor(ECC_Visibility, false, HitResult); 
 	if (!HitResult.bBlockingHit) return;
@@ -121,6 +132,12 @@ void AAuraPlayerController::CursorTrace()
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)/*按下*/
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FMyGameplayTags::Get().Player_Block_InputPresseed))
+	{
+		/*如果有些技能触发，需要阻止按键按下动作，在此通过标签即可阻止*/
+		return;
+	}
+	
 	//GEngine->AddOnScreenDebugMessage(1,2,FColor::Red,*InputTag.ToString());
 	if (InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
 	{
@@ -128,12 +145,19 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)/*按�
 		bAutoRunning = false;
 		FollowTime = 0.f;
 	}
-
-	
+	/*如果按钮按下调用ASC中，专注于雷电技能，前置瞄准阶段触发*/
+	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)/*释放*/
 {
+
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FMyGameplayTags::Get().Player_Block_InputReleased))
+	{
+		/*如果有些技能触发，需要阻止按键释放动作，在此通过标签即可阻止*/
+		return;
+	}
+	
 	if(!InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
 	{
 		/*我们通过ASC里面的函数激活GA所以要先获取ASC，但是不能确定是否为空指针，所以先检查*/
@@ -144,34 +168,43 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)/*释�
 	if (!bTargeting && !bShiftKeyDown)
 	{
 		const APawn* ControllerPawn = GetPawn();
-        		if (FollowTime <= shortpressThreshold && ControllerPawn)
-        		{
-        			/*虚幻引擎内置自动寻路避障插件，返回路径*/
-        			if (UNavigationPath* NavPat = UNavigationSystemV1::FindPathToLocationSynchronously(this,ControllerPawn->GetActorLocation(),CachedDestination))
-        			{
-        				Spline->ClearSplinePoints();
-        				for (const FVector& PathPoint : NavPat->PathPoints)
-        				{
-        					Spline->AddSplinePoint(PathPoint,ESplineCoordinateSpace::World);
-        					DrawDebugSphere(GetWorld(),PathPoint,10,10,FColor::White,false,5.f);
-        				}
-        				if (NavPat->PathPoints.Num() > 0)
-        				{
-        					CachedDestination = NavPat->PathPoints[NavPat->PathPoints.Num()-1];/*把导航点减1是为了解决有的地方被遮挡无法到达导致人物无限移动*/
-                            bAutoRunning = true;
-        				}
+			if (FollowTime <= shortpressThreshold && ControllerPawn)
+			{
+				/*虚幻引擎内置自动寻路避障插件，返回路径*/
+				if (UNavigationPath* NavPat = UNavigationSystemV1::FindPathToLocationSynchronously(this,ControllerPawn->GetActorLocation(),CachedDestination))
+				{
+					Spline->ClearSplinePoints();
+					for (const FVector& PathPoint : NavPat->PathPoints)
+					{
+						Spline->AddSplinePoint(PathPoint,ESplineCoordinateSpace::World);
+						DrawDebugSphere(GetWorld(),PathPoint,10,10,FColor::White,false,5.f);
+					}
+					if (NavPat->PathPoints.Num() > 0)
+					{
+						CachedDestination = NavPat->PathPoints[NavPat->PathPoints.Num()-1];/*把导航点减1是为了解决有的地方被遮挡无法到达导致人物无限移动*/
+						bAutoRunning = true;
+					}
         				FollowTime = 0.f;
         				bTargeting = false;
-        			}
+				}
+				if (GetASC() && !GetASC()->HasMatchingGameplayTag(FMyGameplayTags::Get().Player_Block_CursorTrace))
+				{
+					/*如果有些技能触发，需要阻止光标特效，这里通过标签阻止，当有标签阻止执行光标特效*/
 					/*在鼠标点击地点生成特效*/
-        			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ClickNiagaraComponent,CachedDestination);
-        		}
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ClickNiagaraComponent,CachedDestination);
+				}
+			}
 	}
 }
 
 void AAuraPlayerController::AbilityInputTagHold(FGameplayTag InputTag)/*长按*/
 {
-
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FMyGameplayTags::Get().Player_Block_InputHold))
+	{
+		/*如果有些技能触发，需要阻止按键长按动作，在此通过标签即可阻止*/
+		return;
+	}
+	
 	if (!InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
 	{
 		if (GetASC()) GetASC()->AbilityInputTagHold(InputTag);
@@ -180,7 +213,7 @@ void AAuraPlayerController::AbilityInputTagHold(FGameplayTag InputTag)/*长按*/
 	if (bTargeting || bShiftKeyDown)
 	{
 		if (GetASC()) GetASC()->AbilityInputTagHold(InputTag);
-		GEngine->AddOnScreenDebugMessage(1, 1, FColor::Black, FString::Printf(TEXT("bShiftKeyDown: %s"), bShiftKeyDown ? TEXT("True") : TEXT("False")));
+	
 	}
 	else
 	{
@@ -210,6 +243,12 @@ UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 
 void AAuraPlayerController::Move(const struct FInputActionValue& InputActionValue)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FMyGameplayTags::Get().Player_Block_InputPresseed))
+	{
+		/*如果有些技能触发，需要阻止人物移动，在此通过标签即可阻止*/
+		return;
+	}
+	
 	//分别获取二维值和旋转，然后新建一个旋转参数（俯视角镜头）
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 	const FRotator Rotation = GetControlRotation();

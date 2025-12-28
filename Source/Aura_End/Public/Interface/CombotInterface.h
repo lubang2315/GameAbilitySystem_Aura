@@ -107,4 +107,12 @@ public:
 
 	/*获取Actor死亡委托*/
 	virtual FOnDeath& GetDeath() = 0;
+
+	/*设置是否处于技能释放瞄准保持阶段*/
+	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent)
+	void SetInShockLoop(bool bInLoop);
+
+	/*获取Aura的武器组件*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	USkeletalMeshComponent* GetWeapon();
 };

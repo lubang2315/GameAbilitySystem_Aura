@@ -20,6 +20,10 @@ public:
 	/*创建负面影响相关参数结构体*/
 	FDamageEffectPrams MakeDamageEffectPramsFromClassDefault(AActor* TargetActor = nullptr) const;
 
+	/*获取技能伤害*/
+	UFUNCTION(BlueprintPure)
+	float GetDamageAtLevel();
+
 protected:
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)

@@ -125,6 +125,12 @@ public:
 
 	/*Meta Attributes Tags*/
 	FGameplayTag Attributes_Meta_InComingXP;
+
+	/*用于在激活技能时阻止激活其他不需要激活的技能,通过标签阻止输入，释放，长按，和光标射线*/
+	FGameplayTag Player_Block_InputPresseed;
+	FGameplayTag Player_Block_InputReleased;
+	FGameplayTag Player_Block_InputHold;
+	FGameplayTag Player_Block_CursorTrace;
 	
 private:
 	static FMyGameplayTags GameplayTags;

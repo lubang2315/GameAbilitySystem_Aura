@@ -35,6 +35,7 @@ public:
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual void Die(const FVector& DeathImpulse) override;
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
 	
 	/*创建一个容器，方便敌人近战模版的泛用性，因为有拿武器和不拿武器的小兵，并且有左右手切换攻击的类型，保证泛用性，这里创建容器把标签和蒙太奇关联*/
 	UPROPERTY(EditAnywhere,Category="Combat")

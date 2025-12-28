@@ -12,6 +12,7 @@
 #include "Tags/AuraGameplayTags.h"
 #include "UI/HUD/AuraHUDBase.h"
 #include "UI/WidgetController/AuraWidgetController.h"
+#include "limits.h"
 
 bool UMyFunctionLibrary::MakeWidgetControllerParams(const UObject* WorldContextObject,FWidgetControllerParams& OutWCParams, AAuraHUDBase*& OutHUD)
 {
@@ -207,6 +208,48 @@ void UMyFunctionLibrary::GetLivePlayersWithinRadius(const UObject* WorldContextO
 				OutOverlappingActors.AddUnique(OverlapResult.GetActor());
 			}
 		}
+	}
+}
+
+void UMyFunctionLibrary::GetClosestTargets(int32 MaxTarget, const FVector& Origin, const TArray<AActor*>& Actors,TArray<AActor*>& OutTargets)
+{
+	/*输入参数分别为：获取最大Actor数量，目标点位置，捕获范围内所有Actor，经过筛选的离目标点最近的Actor*/
+
+	if (Actors.Num() <= MaxTarget)
+	{
+		OutTargets = Actors;
+		return;
+	}
+
+	/*创建一个Actor本地数组*/
+	TArray<AActor*> LocalActor = Actors;
+	/*while循环累计*/
+	int32 NumTargetFound = 0;
+
+	/*直到找完MaxTarget个停止*/
+	while (NumTargetFound < MaxTarget)
+	{
+		/*如果没有可遍历的退出*/
+		if (LocalActor.Num() == 0) break;
+		/*创建一个默认最远距离*/
+		double ClosestDistance = TNumericLimits<double>::Max();
+		/*缓存当前距离最近的Actor*/
+		AActor* ClosestActor;
+		for (AActor* Actor : LocalActor)
+		{
+			/*获取Actor与目标点距离*/
+			const double Distance = (Actor->GetActorLocation() - Origin).Length();
+			if (Distance < ClosestDistance)
+			{
+				ClosestDistance = Distance;
+				ClosestActor = Actor;
+			}
+		}
+		/*从遍历数组中移除最近对象并添加到输出数组中*/
+		LocalActor.Remove(ClosestActor);
+		OutTargets.AddUnique(ClosestActor);
+		/*递增数量*/
+		++NumTargetFound;
 	}
 }
 

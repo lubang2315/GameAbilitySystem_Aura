@@ -63,6 +63,28 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 	}
 }
 
+void UAuraAbilitySystemComponent::AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	if (!InputTag.IsValid()) return;
+
+	for (auto ActivateGA : GetActivatableAbilities())
+	{
+		if (ActivateGA.DynamicAbilityTags.HasTagExact(InputTag))
+		{
+			/*此函数含义复杂，但很重要！！！，告知技能规格技能被触发，技能规格内部是有好几个状态布尔的，你通知他就会改变状态，
+			 *就会影响BindAbilityAction(自定义的模版函数)函数里面的回调函数，详见AuraPlayerController，AuraInputComponent*/
+			AbilitySpecInputPressed(ActivateGA);
+			if (ActivateGA.IsActive())
+			{
+				/*通知雷电技能GA内部的回调，声明按键已经按下*/
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed/*告诉服务器的该技能玩家按下按键了*/,ActivateGA.Handle/*要告诉的技能*/,ActivateGA.ActivationInfo.GetActivationPredictionKey());
+		
+			}
+		}
+		
+	}
+}
+
 void UAuraAbilitySystemComponent::AbilityInputTagHold(const FGameplayTag GameplayTag)
 {
 	if (!GameplayTag.IsValid()) return;
@@ -89,10 +111,12 @@ void UAuraAbilitySystemComponent::AbilityAssetTagReleased(const FGameplayTag Gam
 
 	for (auto ActivateGA : GetActivatableAbilities())
 	{
-		if (ActivateGA.DynamicAbilityTags.HasTagExact(GameplayTag))
+		if (ActivateGA.DynamicAbilityTags.HasTagExact(GameplayTag) && ActivateGA.IsActive())
 		{
 			/*当GA触发完毕，按键已经释放，技能也不一定结束，所以只需要告诉GA已经结束技能停止接收输入操作*/
 			AbilitySpecInputReleased(ActivateGA);
+			/*通知雷电技能GA内部的回调，声明按键已经释放*/
+			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased,ActivateGA.Handle,ActivateGA.ActivationInfo.GetActivationPredictionKey());
 		}
 	}
 }
