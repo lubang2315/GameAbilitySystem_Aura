@@ -33,6 +33,9 @@ AAuraEnemy::AAuraEnemy()
     bUseControllerRotationRoll = false;
 
     GetCharacterMovement()->bUseControllerDesiredRotation = true;
+
+    /*设置敌人移动速度*/
+    BaseWalkSpeed = 250.f;
 }
 
 void AAuraEnemy::BeginPlay()
@@ -81,10 +84,13 @@ void AAuraEnemy::UnHighLightActor()
 
 void AAuraEnemy::InitAbilityActorInfo()
 {
-   //初始化能力系统
-      AbilitySystemComponent->InitAbilityActorInfo(this,this);
-      Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+    //初始化能力系统
+    AbilitySystemComponent->InitAbilityActorInfo(this,this);
+    Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
+    /*注册监听负面眩晕回调*/
+    AbilitySystemComponent->RegisterGameplayTagEvent(FMyGameplayTags::Get().Debuff_Stun,EGameplayTagEventType::NewOrRemoved).AddUObject(this,&AAuraEnemy::StunTagChange);
+    
     /*ASC初始化成功广播给Niagara系统*/
     OnASCRegistered.Broadcast(AbilitySystemComponent);
     
@@ -149,7 +155,6 @@ void AAuraEnemy::InitAbilityActorInfo()
     );
     /*end*/
 
-    
 }
 
 void AAuraEnemy::InitializePrimaryAttributes() const
@@ -181,7 +186,7 @@ void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallBackTag, int32 NewCou
 {
     bHitReacting = NewCount > 0;
     GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0 : BaseWalkSpeed;
-    /*设置是否击中敌人为否*/
+    /*设置是否击中敌人为否，修改的是黑板键控制敌人的AI控制器*/
     if (AuraAIController && AuraAIController->GetBlackboardComponent())
     {
         AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);
@@ -191,4 +196,13 @@ void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallBackTag, int32 NewCou
 int32 AAuraEnemy::GetPlayerLevel_Implementation()
 {
     return Level;
+}
+
+void AAuraEnemy::StunTagChange(const FGameplayTag CallBackTag, int32 NewCount)
+{
+    Super::StunTagChange(CallBackTag, NewCount);
+    if (AuraAIController && AuraAIController->GetBlackboardComponent())
+    {
+        AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Stunned"),bIsStunned);
+    }
 }

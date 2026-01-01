@@ -115,4 +115,12 @@ public:
 	/*获取Aura的武器组件*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	USkeletalMeshComponent* GetWeapon();
+
+	/*获取玩家或敌人是否处于持续受击状态*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool GetIsBeingShocked() const;
+
+	/*设置玩家或敌人是否处于持续受击状态*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void SetIsBeingShocked(bool bIsBeingShocked);
 };

@@ -267,7 +267,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	Damage = IsCriticalHit ? Damage*2.f + CriticalHitDamage : Damage;
 
 	/*测试用吧伤害提高了10！测试完可删除*/
-	Damage += 30.f;
+	//Damage += 30.f;
 	
 	/*End自定义计算区域*/
 	

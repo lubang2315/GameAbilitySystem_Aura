@@ -154,9 +154,15 @@ void UAuraAttributeSet::HandelIncomingDamage(const FEffectPropreties& Props)
 		}
 		else
 		{
-			FGameplayTagContainer TagContainer;
-			TagContainer.AddTag(FMyGameplayTags::Get().Effects_HitReact);
-			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);/*按标签激活技能*/
+			/*先判断是持续受击还是瞬时受击*/
+			if (Props.TargetCharacter->Implements<UCombotInterface>() && !ICombotInterface::Execute_GetIsBeingShocked(Props.TargetCharacter))
+			{
+				/*激活受击技能*/
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FMyGameplayTags::Get().Effects_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);/*按标签激活技能*/
+			}
+			
 
 			/*设置击飞效果*/
 			const FVector& KnockBackForce = UMyFunctionLibrary::GetKnockBackForce(Props.EffectContextHandle);
@@ -259,6 +265,16 @@ void UAuraAttributeSet::HandelDebuff(const FEffectPropreties& Props)
 	FInheritedTagContainer InheritedOwnedTagsContainer = TargetTagsGameplayEffectComponent.GetConfiguredTargetTagChanges();//获取到标签容器
 	const FGameplayTag DebuffTag = FMyGameplayTags::Get().DamageTypeToDebuff[DebuffType];
 	InheritedOwnedTagsContainer.AddTag(DebuffTag);//向容器中添加Debuff类型标签
+	const FMyGameplayTags& MyGameplayTags = FMyGameplayTags::Get();
+	/*受到眩晕，通过添加标签阻止人物移动*/
+	if (DebuffTag.MatchesTagExact(MyGameplayTags.Debuff_Stun))
+	{
+		InheritedOwnedTagsContainer.AddTag(MyGameplayTags.Player_Block_CursorTrace);
+		InheritedOwnedTagsContainer.AddTag(MyGameplayTags.Player_Block_InputHold);
+		InheritedOwnedTagsContainer.AddTag(MyGameplayTags.Player_Block_InputPresseed);
+		InheritedOwnedTagsContainer.AddTag(MyGameplayTags.Player_Block_InputReleased);
+	}
+	
 	TargetTagsGameplayEffectComponent.SetAndApplyTargetTagChanges(InheritedOwnedTagsContainer);//应用并更新
 
 	/*设置属性的修改*/

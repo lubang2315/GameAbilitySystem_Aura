@@ -21,6 +21,10 @@ class AURA_END_API AAuraCharacterBase : public ACharacter,public IAbilitySystemI
 	GENERATED_BODY()
 
 public:
+
+	/**设置服务器属性值复制到客户端，用于预测系统，我们已经把过去值和限值提交给能力系统管理，当服务器收到改变值会验证有效性并同步其他客户端*/
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	AAuraCharacterBase();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;}
@@ -36,6 +40,8 @@ public:
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual void Die(const FVector& DeathImpulse) override;
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
+	virtual bool GetIsBeingShocked_Implementation() const override;
+	virtual void SetIsBeingShocked_Implementation(bool isBeingShocked) override;
 	
 	/*创建一个容器，方便敌人近战模版的泛用性，因为有拿武器和不拿武器的小兵，并且有左右手切换攻击的类型，保证泛用性，这里创建容器把标签和蒙太奇关联*/
 	UPROPERTY(EditAnywhere,Category="Combat")
@@ -78,6 +84,33 @@ protected:
 	virtual void BeginPlay() override;
 
 	bool bDead = false;
+
+	/*是否处于眩晕Debuff效果*/
+	UPROPERTY(ReplicatedUsing=OnRep_Stunned,BlueprintReadOnly)
+	bool bIsStunned = false;
+
+	/*是否处于燃烧Debuff效果*/
+	UPROPERTY(ReplicatedUsing=OnRep_Burn,BlueprintReadOnly)
+	bool bIsBurn = false;
+
+	/*敌人受到眩晕Debuff用来同步客户端阻止移动标签*/
+	UFUNCTION()
+	virtual void OnRep_Stunned();
+
+	/*敌人受到燃烧Debuff用来同步客户端Niagara*/
+	UFUNCTION()
+	virtual void OnRep_Burn();
+
+	/*是否处于持续受击状态*/
+	UPROPERTY(Replicated,BlueprintReadOnly)
+	bool bIsBeingShocked = false;
+	
+	/*眩晕标签变化后的回调*/
+	virtual void StunTagChange(const FGameplayTag CallBackTag,int32 NewCount);
+
+	/*角色最大移动速度*/
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
+	float BaseWalkSpeed = 600.f;
 
 	//创建一个可以附着在骨骼网格体上的类
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
@@ -150,9 +183,13 @@ protected:
 	/*召唤随从数量*/
 	int32 MinionCount = 0;
 
-	/*设置Debuff的Niagara特效*/
+	/*设置燃烧Debuff的Niagara特效*/
 	UPROPERTY(visibleAnywhere)
 	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
+
+	/*设置眩晕Debuff的Niagara特效*/
+	UPROPERTY(visibleAnywhere)
+	TObjectPtr<UDebuffNiagaraComponent> StunDebuffComponent;
 	
 private:
 	/*AuraGA*/

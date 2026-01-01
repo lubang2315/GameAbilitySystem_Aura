@@ -76,6 +76,7 @@ public:
 	static bool ISNotFriend(AActor* FirstActor,AActor* SecondActor);
 
 	/*根据传入的负面影响参数生产GE并应用*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
 	static FGameplayEffectContextHandle ApplyGameplayEffect(const FDamageEffectPrams& DamageEffectPrams);
 
 	/*根据敌人类型和等级返回相应的XP值*/

@@ -18,6 +18,7 @@ class AURA_END_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 
 public:
 	/*创建负面影响相关参数结构体*/
+	UFUNCTION(BlueprintPure)
 	FDamageEffectPrams MakeDamageEffectPramsFromClassDefault(AActor* TargetActor = nullptr) const;
 
 	/*获取技能伤害*/

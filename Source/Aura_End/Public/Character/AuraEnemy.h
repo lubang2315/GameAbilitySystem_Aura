@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "AI/AuraAIController.h"
 #include "Character/AuraCharacterBase.h"
-#include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Interface/EnemyInterface.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
@@ -49,9 +48,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly,Category = "Combat")
 	bool bHitReacting = false;
-
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = "Combat")
-	float BaseWalkSpeed = 250.f;
 	
     void HitReactTagChanged(const FGameplayTag CallBackTag,int32 NewCount);
 	
@@ -75,4 +71,7 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<AAuraAIController> AuraAIController;
+
+	/*眩晕回调*/
+	virtual void StunTagChange(const FGameplayTag CallBackTag, int32 NewCount) override;
 };

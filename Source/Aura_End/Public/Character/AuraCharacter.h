@@ -60,6 +60,12 @@ public:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	TObjectPtr<UNiagaraComponent> LevelUpNiagara;
 
+	/*受到眩晕阻止玩家移动*/
+	virtual void OnRep_Stunned() override;
+
+	/*受到眩晕阻止玩家移动*/
+	virtual void OnRep_Burn() override;
+
 private:
 	virtual void InitAbilityActorInfo() override;
 

@@ -10,6 +10,18 @@
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tags/AuraGameplayTags.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
+
+
+void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AAuraCharacterBase,bIsStunned);
+	DOREPLIFETIME(AAuraCharacterBase,bIsBurn);
+	DOREPLIFETIME(AAuraCharacterBase,bIsBeingShocked);
+}
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -17,10 +29,16 @@ AAuraCharacterBase::AAuraCharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	/*设置Debuff的Niagara附着在跟骨骼以及标签*/
+	/*设置燃烧Debuff的Niagara附着在跟骨骼以及标签*/
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("DebuffNiagara");
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
 	BurnDebuffComponent->DebuffTag = FMyGameplayTags::Get().Debuff_Burn;
+
+	/*设置眩晕Debuff的Niagara附着在跟骨骼以及标签*/
+	StunDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("StunDebuffComponent");
+	//StunDebuffComponent->SetupAttachment(GetMesh(),FName("Hand_02"));
+	StunDebuffComponent->SetupAttachment(GetRootComponent());
+	StunDebuffComponent->DebuffTag = FMyGameplayTags::Get().Debuff_Stun;
 
 	//1.创建一个骨骼网格体实例
 	//2.实例的插槽名称为WeaponHandSocket通过GetMesh（）附着在人物网格体下面
@@ -59,6 +77,16 @@ USkeletalMeshComponent* AAuraCharacterBase::GetWeapon_Implementation()
 	return Weapon;
 }
 
+bool AAuraCharacterBase::GetIsBeingShocked_Implementation() const
+{
+	return bIsBeingShocked;
+}
+
+void AAuraCharacterBase::SetIsBeingShocked_Implementation(bool isBeingShocked)
+{
+	bIsBeingShocked = isBeingShocked;
+}
+
 void AAuraCharacterBase::MultCastHandleDeath_Implementation(const FVector& DeathImpulse)
 {
 	/*play Death Sound*/
@@ -84,6 +112,10 @@ void AAuraCharacterBase::MultCastHandleDeath_Implementation(const FVector& Death
 	Dissolve();
 	
 	bDead = true;
+
+	/*玩家死亡停止燃烧和眩晕Debuff*/
+	BurnDebuffComponent->Deactivate();
+	StunDebuffComponent->Deactivate();
 
 	/*广播死亡事件*/
 	OnDeath.Broadcast(this);
@@ -141,6 +173,20 @@ void AAuraCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AAuraCharacterBase::OnRep_Stunned()
+{
+}
+
+void AAuraCharacterBase::OnRep_Burn()
+{
+}
+
+void AAuraCharacterBase::StunTagChange(const FGameplayTag CallBackTag, int32 NewCount)
+{
+	bIsStunned = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0 : BaseWalkSpeed;
 }
 
 FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const

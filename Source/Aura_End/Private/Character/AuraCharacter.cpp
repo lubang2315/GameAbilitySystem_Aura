@@ -13,6 +13,8 @@
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "UI/HUD/AuraHUDBase.h"
 #include "NiagaraComponent.h"
+#include "Gas/Debuff/DebuffNiagaraComponent.h"
+#include "Tags/AuraGameplayTags.h"
 
 AAuraCharacter::AAuraCharacter()
 {
@@ -157,6 +159,42 @@ int32 AAuraCharacter::GetSpellPoints_Implementation() const
 	return AuraPlayerState->GetPlayerSpellPoints();
 }
 
+void AAuraCharacter::OnRep_Stunned()
+{
+	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		const FMyGameplayTags& GameplayTags = FMyGameplayTags::Get();
+		FGameplayTagContainer BlockRemove;
+		BlockRemove.AddTag(GameplayTags.Player_Block_CursorTrace);
+		BlockRemove.AddTag(GameplayTags.Player_Block_InputHold);
+		BlockRemove.AddTag(GameplayTags.Player_Block_InputPresseed);
+		BlockRemove.AddTag(GameplayTags.Player_Block_InputReleased);
+		if (bIsStunned)
+		{
+			AuraASC->AddLooseGameplayTags(BlockRemove);
+			StunDebuffComponent->Activate();
+		}
+		else
+		{
+			AuraASC->RemoveLooseGameplayTags(BlockRemove);
+			StunDebuffComponent->Deactivate();
+		}
+	}
+	
+}
+
+void AAuraCharacter::OnRep_Burn()
+{
+	if (bIsBurn)
+	{
+		BurnDebuffComponent->Activate();
+	}
+	else
+	{
+		BurnDebuffComponent->Deactivate();
+	}
+}
+
 void AAuraCharacter::InitAbilityActorInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
@@ -176,6 +214,9 @@ void AAuraCharacter::InitAbilityActorInfo()
 	}
 	InitializePrimaryAttributes();
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
+
+	/*注册监听负面眩晕回调*/
+	AbilitySystemComponent->RegisterGameplayTagEvent(FMyGameplayTags::Get().Debuff_Stun,EGameplayTagEventType::NewOrRemoved).AddUObject(this,&AAuraCharacter::StunTagChange);
 }
 
 int32 AAuraCharacter::GetPlayerLevel_Implementation()

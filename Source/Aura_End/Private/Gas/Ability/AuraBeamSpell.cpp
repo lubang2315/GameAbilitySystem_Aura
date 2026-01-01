@@ -101,8 +101,8 @@ void UAuraBeamSpell::StoreAdditionalTarget(TArray<AActor*>& OutAdditionalTarget)
 		MouseHitActor->GetActorLocation());
 
 	/*限定捕获最大敌人数量*/
-	//int32 NumActors = FMath::Min(GetAbilityLevel() - 1, MaxNumShockTargets);
-	int32 NumActors = 5;
+	int32 NumActors = FMath::Min(GetAbilityLevel() - 1, MaxNumShockTargets);
+	//int32 NumActors = 5;
 
 	/*根据要求筛选距离最近的Actor*/
 	UMyFunctionLibrary::GetClosestTargets(NumActors,MouseHitActor->GetActorLocation(),OverlappingActors,OutAdditionalTarget);
