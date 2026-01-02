@@ -131,6 +131,11 @@ public:
 	FGameplayTag Player_Block_InputReleased;
 	FGameplayTag Player_Block_InputHold;
 	FGameplayTag Player_Block_CursorTrace;
+
+	/*被动技能:守护光环，生命恢复，蓝量恢复*/
+	FGameplayTag Abilities_Passive_HaloOfProtection;
+	FGameplayTag Abilities_Passive_LifeSiphon;
+	FGameplayTag Abilities_Passive_ManaSiphon;
 	
 private:
 	static FMyGameplayTags GameplayTags;

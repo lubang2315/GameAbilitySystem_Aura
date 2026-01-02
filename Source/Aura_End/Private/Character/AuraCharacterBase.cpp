@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "Aura_End/Aura_End.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Gas/Debuff/DebuffNiagaraComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
@@ -13,6 +14,14 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
+
+void AAuraCharacterBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	/*这个是被动技能附着的场景组件，在这里把附着场景组件旋转设置为零，不随附着的人物骨骼旋转*/
+	EffectAttachComponent->SetWorldRotation(FRotator::ZeroRotator);
+}
 
 void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -27,7 +36,7 @@ void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 AAuraCharacterBase::AAuraCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	/*设置燃烧Debuff的Niagara附着在跟骨骼以及标签*/
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("DebuffNiagara");
@@ -53,6 +62,17 @@ AAuraCharacterBase::AAuraCharacterBase()
 	//GetMesh()->SetCollisionResponseToChannel(ECC_Camera,ECR_Ignore);
 	//GetMesh()->SetCollisionResponseToChannel(ECC_Projectile,ECR_Overlap);
 	//GetMesh()->SetGenerateOverlapEvents(true);
+
+	/*在这里创建被动技能特效的实例*/
+	/*首先创建要附着在人物根骨骼场景组件，然后不让场景组件旋转，然后让被动技能特效附着在场景组件上，这样被动技能特效就只会随人物移动而不会发生旋转*/
+	EffectAttachComponent = CreateDefaultSubobject<USceneComponent>("EffectAttachComponent");
+	EffectAttachComponent->SetupAttachment(GetRootComponent());
+	HaloOfProtection = CreateDefaultSubobject<UPassiveNiagaraComponent>("HaloOfProtection");
+	HaloOfProtection->SetupAttachment(EffectAttachComponent);
+	Lifesiphon = CreateDefaultSubobject<UPassiveNiagaraComponent>("Lifesiphon");
+	Lifesiphon->SetupAttachment(EffectAttachComponent);
+	ManaSiphon = CreateDefaultSubobject<UPassiveNiagaraComponent>("ManaSiphon");
+	ManaSiphon->SetupAttachment(EffectAttachComponent);
 }
 
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const

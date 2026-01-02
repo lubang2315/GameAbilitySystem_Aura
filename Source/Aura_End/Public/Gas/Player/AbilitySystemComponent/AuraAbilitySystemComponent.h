@@ -19,6 +19,11 @@ DECLARE_DELEGATE_OneParam(FForEachAbility,const FGameplayAbilitySpec&)
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged,const FGameplayTag& /*AbilityTag*/ ,const FGameplayTag&  /*StatusTag*/,int32 /*level*/)
 /*技能装配委托*/
 DECLARE_MULTICAST_DELEGATE_FourParams(FAbilityEquip,const FGameplayTag& /*技能标签*/,const FGameplayTag& /*技能状态标签*/,const FGameplayTag& /*技能输入插槽Slot标签*/,const FGameplayTag& /*上一个输入插槽标签*/)
+/*终止技能激活的回调*/
+DECLARE_MULTICAST_DELEGATE_OneParam(FDeactivatePassiveAbility,const FGameplayTag& /*技能标签*/)
+/*被动技能的特效激活与终止回调*/
+DECLARE_MULTICAST_DELEGATE_TwoParams(FActivatePassiveEffect,const FGameplayTag& /*被动技能标签*/,bool /*激活状态*/)
+
 
 UCLASS()
 class AURA_END_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
@@ -40,6 +45,12 @@ public:
 
 	/*技能装备到技能栏委托*/
 	FAbilityEquip AbilityEquipDelegate;
+
+	/*取消激活技能的委托*/
+	FDeactivatePassiveAbility DeactivatePassiveAbility;
+
+	/*被动技能特效激活状态委托*/
+	FActivatePassiveEffect ActivatePassiveEffectDelegate;
 	
 	/*添加能力，注意能力在添加后要使用还要激活 *ActivateGA**/
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
@@ -105,6 +116,28 @@ public:
 
 	/*用来判断技能属主动还是被动技能类型*/
 	static bool AbilityHasSlot(FGameplayAbilitySpec* Spec,const FGameplayTag& Slot);
+
+	/*用来判断目标插槽是否被占用*/
+	bool SlotIsEmpty(const FGameplayTag& SlotTag);
+
+	/*技能是否已经装备在相应插槽中*/
+	static bool AbilityHasSlot( const FGameplayAbilitySpec& Spec,const FGameplayTag& SlotTag);
+
+	/*判断技能是否装配在任何一个插槽中*/
+	static  bool AbilityHasAnySlot(const FGameplayAbilitySpec& Spec);
+
+	/*根据已经装配技能槽位获取技能规格*/
+	FGameplayAbilitySpec* GetSpecWithSlot(const FGameplayTag& SlotTag);
+
+	/*判断技能是不是被动技能*/
+	bool IsPassiveAbility(const FGameplayAbilitySpec& GA) const;
+
+	/*修改技能装配的插槽*/
+	void AssignSlotToAbility(FGameplayAbilitySpec& GA,const FGameplayTag& SlotTag);
+
+	/*同步被动技能特效，每个客户端跟服务器都能看到*/
+	UFUNCTION(NetMulticast,Unreliable)
+	void MulticastActivatePassiveEffect(const FGameplayTag& AbilityTag,bool bActivate);
 	
 protected:
 	UFUNCTION(Client, reliable)
@@ -114,6 +147,10 @@ protected:
 	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag,int32 NewLevel);
 	
 };
+
+
+
+
 
 
 

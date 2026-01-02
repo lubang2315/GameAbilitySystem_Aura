@@ -7,6 +7,7 @@
 #include "AttributeSet.h"
 #include "GameplayEffect.h"
 #include "GameFramework/Character.h"
+#include "Gas/Passive/PassiveNiagaraComponent.h"
 #include "Interface/CombotInterface.h"
 #include "AuraCharacterBase.generated.h"
 
@@ -21,6 +22,7 @@ class AURA_END_API AAuraCharacterBase : public ACharacter,public IAbilitySystemI
 	GENERATED_BODY()
 
 public:
+	virtual void Tick(float DeltaSeconds) override;
 
 	/**设置服务器属性值复制到客户端，用于预测系统，我们已经把过去值和限值提交给能力系统管理，当服务器收到改变值会验证有效性并同步其他客户端*/
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -190,7 +192,25 @@ protected:
 	/*设置眩晕Debuff的Niagara特效*/
 	UPROPERTY(visibleAnywhere)
 	TObjectPtr<UDebuffNiagaraComponent> StunDebuffComponent;
-	
+
+	/*被动技能特效相关*/
+	/*光环守护*/
+	UPROPERTY(visibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> HaloOfProtection;
+
+	/*生命恢复*/
+	UPROPERTY(visibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> Lifesiphon;
+
+	/*蓝量恢复*/
+	UPROPERTY(visibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> ManaSiphon;
+
+	/*场景组件，这里主要是让被动技能特效附着在场景组件，而场景组件可以在附着在根骨骼情况下不随之发生旋转*/
+	UPROPERTY(visibleAnywhere)
+	TObjectPtr<USceneComponent> EffectAttachComponent;
+	/*End*/
+
 private:
 	/*AuraGA*/
 	UPROPERTY(EditAnywhere,Category="Attributes")
