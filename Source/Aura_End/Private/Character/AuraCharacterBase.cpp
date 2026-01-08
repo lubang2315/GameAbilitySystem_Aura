@@ -183,9 +183,21 @@ FOnDeath& AAuraCharacterBase::GetDeath()
 	return OnDeath;
 }
 
+FOnDamageSignature& AAuraCharacterBase::GetDamageSignature()
+{
+	return OnDamageSignature;
+}
+
 ECharacterClass AAuraCharacterBase::GetCharacterClass_Implementation()
 {
 	return CharacterClass;
+}
+
+float AAuraCharacterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,class AController* EventInstigator, AActor* DamageCauser)
+{
+	const float DamagetTaken = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnDamageSignature.Broadcast(DamagetTaken);
+	return DamagetTaken;
 }
 
 // Called when the game starts or when spawned

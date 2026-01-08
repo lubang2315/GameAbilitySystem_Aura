@@ -88,8 +88,10 @@ public:
 	/*受击技能标签*/
 	FGameplayTag Abilities_HitReact;
 
-	/*雷击技能标签，这里没完善技能仅做测试*/
+	/*Aura Ability Tag:火球术，雷击，奥数碎片*/
+	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Lightning_Electrocute;
+	FGameplayTag Abilities_Arcane_ArcaneShards;
 	
 	/*关于技能状态标签，以下分别是技能未解锁，可解锁，已解锁，已装备*/
 	FGameplayTag Abilities_Status_Locked;
@@ -104,12 +106,10 @@ public:
 
 	/*空技能标签*/
 	FGameplayTag Abilities_None;
-	
-	/*Aura Ability Tag*/
-	FGameplayTag Abilities_Fire_FireBolt;
 
 	/*Aura Ability CoolDown Tag*/
 	FGameplayTag CoolDown_Fire_FireBolt;
+	FGameplayTag CoolDown_Arcane_ArcaneShards;
 
 	/*Enemy蒙太奇攻击位置标签*/
 	FGameplayTag CombatSocket_Weapon;

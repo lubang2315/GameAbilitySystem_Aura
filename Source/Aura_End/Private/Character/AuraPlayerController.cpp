@@ -8,6 +8,9 @@
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Actor/MagicCircle.h"
+#include "Aura_End/Aura_End.h"
+#include "Components/DecalComponent.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "Input/AuraInputComponent.h"
 #include "Interface/EnemyInterface.h"
@@ -21,6 +24,26 @@ AAuraPlayerController::AAuraPlayerController()
 	bReplicates = true;
     
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
+}
+
+void AAuraPlayerController::ShowMagicCircle(UMaterialInterface* DeaclMaterial)
+{
+	/*显示魔法圈在光标位置*/
+	if (!IsValid(MagicCircle)) MagicCircle = GetWorld()->SpawnActor<AMagicCircle>(MagicCircleClass);
+
+	/*设置贴画材质*/
+	if (DeaclMaterial != nullptr)
+	{
+		MagicCircle->MagicCircle->SetMaterial(0, DeaclMaterial);
+	}
+}
+
+void AAuraPlayerController::HideMagicCircle() const
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->Destroy();
+	}
 }
 
 void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargerCharacter,bool IsBlockHit,bool IsCriticalHit)
@@ -81,6 +104,8 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	CursorTrace();
 	/**MouseMove*/
 	AutoMove();
+	/*更新魔法圈位置*/
+	UpdataMagicCircleLocation();
 }
 
 void AAuraPlayerController::AutoMove()
@@ -102,6 +127,14 @@ void AAuraPlayerController::AutoMove()
 	
 }
 
+void AAuraPlayerController::UpdataMagicCircleLocation() const
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->SetActorLocation(HitResult.ImpactPoint);
+	}
+}
+
 //通过cursor光标重叠，高亮显示敌人
 void AAuraPlayerController::CursorTrace()
 {
@@ -115,8 +148,10 @@ void AAuraPlayerController::CursorTrace()
 		LastActor =nullptr;
 		return;
 	}
-	
-	GetHitResultUnderCursor(ECC_Visibility, false, HitResult); 
+
+	/*应用范围攻击技能瞄准时不需要索敌，这里通过通道排除*/
+	const ECollisionChannel TraceChannel = IsValid(MagicCircle) ? ECC_ExcludePlayer : ECC_Visibility;
+	GetHitResultUnderCursor(TraceChannel, false, HitResult); 
 	if (!HitResult.bBlockingHit) return;
 	
     LastActor = ThisActor;

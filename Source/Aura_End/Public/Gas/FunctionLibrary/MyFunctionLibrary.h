@@ -65,7 +65,7 @@ public:
 	
 	/*获取半径范围内的Actor*/
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
-	static void GetLivePlayersWithinRadius(const UObject* WorldContextObject,float Radius,TArray<AActor*>& OutOverlappingActors,TArray<AActor*>& ActorsToIgnore,const FVector& SphereOrigin);
+	static void GetLivePlayersWithinRadius(const UObject* WorldContextObject,float Radius,TArray<AActor*>& OutOverlappingActors,const TArray<AActor*>& ActorsToIgnore,const FVector& SphereOrigin);
 
 	/*根据数量要求获取距离最近的几个目标Actor*/
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMEchanics")
@@ -148,6 +148,38 @@ public:
 	/*在一定角度范围内，通过传入均分份数均分角度并通过向量形式返回*/
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayMechanics")
 	static TArray<FVector> EvenlySpacedVectors(const FVector& ForWard/*正前方向*/,const FVector& Axis/*基于旋转的轴*/,float Spread /*角度范围*/,int32 NumRotators/*分段数*/); 
+
+	/*获取当前GE是否进行范围伤害*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static bool GetIsRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*获取当前GE范围伤害的内径伤害半径*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static float GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*获取当前GE范围伤害的外半径伤害半径*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static float GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*获取当前GE范围伤害的中心点*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static FVector GetRadialDamagetOrigin(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	/*设置当前GE是否进行范围伤害*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetIsRadialDamage(UPARAM(ref)  FGameplayEffectContextHandle& EffectContextHandle,bool bInIsRadialDamage);
+
+	/*设置当前GE范围伤害的内径伤害半径*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetRadialDamageInnerRadius(UPARAM(ref)  FGameplayEffectContextHandle& EffectContextHandle,float InRadialDamageInnerRadius);
+
+	/*设置当前GE范围伤害的外半径伤害半径*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetRadialDamageOuterRadius(UPARAM(ref)  FGameplayEffectContextHandle& EffectContextHandle,float InRadialDamageOuterRadius);
+
+	/*设置当前GE范围伤害的中心点*/
+	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetRadialDamagetOrigin(UPARAM(ref)  FGameplayEffectContextHandle& EffectContextHandle,FVector InRadialDamagetOrigin);
 	
 };
 

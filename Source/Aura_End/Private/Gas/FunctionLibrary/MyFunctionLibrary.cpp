@@ -186,7 +186,7 @@ void UMyFunctionLibrary::SetIsCriticalHit(FGameplayEffectContextHandle& EffectCo
  }
 
 void UMyFunctionLibrary::GetLivePlayersWithinRadius(const UObject* WorldContextObject, float Radius,
-	TArray<AActor*>& OutOverlappingActors, TArray<AActor*>& ActorsToIgnore, const FVector& SphereOrigin)
+	TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, const FVector& SphereOrigin)
 {
 	FCollisionQueryParams SphereParams;
 	SphereParams.AddIgnoredActors(ActorsToIgnore);
@@ -279,6 +279,12 @@ FGameplayEffectContextHandle UMyFunctionLibrary::ApplyGameplayEffect(const FDama
 
 	/*设置击飞方向*/
 	SetKnockBackForce(EffectContextHandle,DamageEffectPrams.KnockBackForce);
+
+	/*设置具有范围伤害功能GE的范围伤害的相关参数*/
+	SetIsRadialDamage(EffectContextHandle,DamageEffectPrams.bIsRadialDamage);
+	SetRadialDamageInnerRadius(EffectContextHandle,DamageEffectPrams.RadialDamageInnerRadius);
+	SetRadialDamageOuterRadius(EffectContextHandle,DamageEffectPrams.RadialDamageOuterRadius);
+	SetRadialDamagetOrigin(EffectContextHandle,DamageEffectPrams.RadialDamageOrigin);
 
 	/*创建GE规格句柄*/
 	FGameplayEffectSpecHandle SpecHandle = DamageEffectPrams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectPrams.DamageGameplayEffectClass,DamageEffectPrams.AbilityLevel,EffectContextHandle);
@@ -483,5 +489,73 @@ TArray<FVector> UMyFunctionLibrary::EvenlySpacedVectors(const FVector& ForWard, 
 		Vectors.Add(ForWard);
 	}
 	return Vectors;
+}
+
+bool UMyFunctionLibrary::GetIsRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetIsRadialDamage();
+	}
+	return false;
+}
+
+float UMyFunctionLibrary::GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetRadialDamagetInnerRadius();
+	}
+	return 0.f;
+}
+
+float UMyFunctionLibrary::GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetRadialDamageOuterRadius();
+	}
+	return 0.f;
+}
+
+FVector UMyFunctionLibrary::GetRadialDamagetOrigin(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* GEContextHandle = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return  GEContextHandle->GetRadialDamageOrigin();
+	}
+	return FVector::ZeroVector;
+}
+
+void UMyFunctionLibrary::SetIsRadialDamage(FGameplayEffectContextHandle& EffectContextHandle, bool bInIsRadialDamage)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetIsRadialDamage(bInIsRadialDamage);
+	}
+}
+
+void UMyFunctionLibrary::SetRadialDamageInnerRadius(FGameplayEffectContextHandle& EffectContextHandle,float InRadialDamageInnerRadius)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetRadialDamagetInnerRadius(InRadialDamageInnerRadius);
+	}
+}
+
+void UMyFunctionLibrary::SetRadialDamageOuterRadius(FGameplayEffectContextHandle& EffectContextHandle,float InRadialDamageOuterRadius)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetRadialDamageOuterRadius(InRadialDamageOuterRadius);
+	}
+}
+
+void UMyFunctionLibrary::SetRadialDamagetOrigin(FGameplayEffectContextHandle& EffectContextHandle,FVector InRadialDamagetOrigin)
+{
+	if (FAuraGameplayEffectContext* GEContextHandle = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		GEContextHandle->SetRadialDamageOrigin(InRadialDamagetOrigin);
+	}
 }
 

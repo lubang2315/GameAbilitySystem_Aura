@@ -16,68 +16,85 @@ struct FDamageEffectPrams
 	FDamageEffectPrams(){}
 
 	/*当前上下文对象*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UObject> WorldContextObject = nullptr;
 
 	/*需要应用的GE类*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
 	
 	/*源ASC*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAbilitySystemComponent> SourceAbilitySystemComponent = nullptr;
 	
 	/*目标ASC*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAbilitySystemComponent> TargetAbilitySystemComponent = nullptr;
 	
 	/*基础伤害*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float BaseDamage = 0.0f;
 	
 	/*技能等级*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float AbilityLevel = 1.f;
 
 	/*伤害类型*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FGameplayTag DamageType = FGameplayTag();
 	
 	/*触发负面影响的几率*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffChance = 20.f;
 	
 	/*负面影响伤害数值*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffDamage = 5.f;
 	
 	/*负面伤害触发间隔时间*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffFrequency = 1.f;
 	
 	/*负面影响持续时间*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffDuration = 0.f;
 	
 	/*被技能击中并造成致命一击被弹飞的强度*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DeathImpulseMagnitude = 0.f;
 
 	/*死亡时受到攻击朝向*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FVector DeathImpulse = FVector::ZeroVector;
 
 	/*被技能击中并造成击飞的概率*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float KnockBackChance = 0.f;
 
 	/*被技能击中并造成击飞的概率*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float KnockBackMagnitude = 0.f;
 
 	/*被击飞时受到攻击朝向*/
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FVector KnockBackForce = FVector::ZeroVector;
+
+	/*此伤害类型是否为范围伤害*/
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsRadialDamage = false;
+
+	/*内半径：在此内半径范围内都将承受完整伤害*/
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageInnerRadius = 0.f;
+
+	/*外半径：在外半径中受到最小伤害如果设置0则不受伤害*/
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageOuterRadius = 0.f;
+
+	/*伤害源的中心点*/
+	UPROPERTY(BlueprintReadWrite)
+	FVector RadialDamageOrigin = FVector::ZeroVector;
+	
 };
 
 
@@ -135,6 +152,18 @@ public:
 	void SetDamageType(const TSharedPtr<FGameplayTag> InDamageType) {DamageType = InDamageType; }
 	void SetDeathImpulse(const FVector InDeathImpulse) { DeathImpulse = InDeathImpulse; }
 	void SetKonckBackForce(const FVector InKnockBackForce) {KnockBackForce = InKnockBackForce; }
+
+	/*在其他地方获取奥数技能的伤害相关参数*/
+	bool GetIsRadialDamage() const{return bIsRadialDamage;}
+	float GetRadialDamagetInnerRadius() const{return RadialDamageInnerRadius;}
+	float GetRadialDamageOuterRadius() const{return RadialDamageOuterRadius;}
+	FVector GetRadialDamageOrigin() const{return RadialDamageOrigin;}
+
+	/*在其他地方设置奥数技能的伤害相关参数*/
+	void SetIsRadialDamage(const bool RadialDamage) {bIsRadialDamage = RadialDamage;}
+	void SetRadialDamagetInnerRadius(const float RadialDamageInnerRadiu){RadialDamageInnerRadius = RadialDamageInnerRadiu;}
+	void SetRadialDamageOuterRadius(const float RadialDamageOuterRadiu){RadialDamageOuterRadius = RadialDamageOuterRadiu;}
+	void SetRadialDamageOrigin(const FVector InRadialDamageOrigin){RadialDamageOrigin = InRadialDamageOrigin;}
 	
 protected:
 
@@ -167,7 +196,21 @@ protected:
 	UPROPERTY()
 	FVector KnockBackForce = FVector::ZeroVector;
 
-	
+	/*此伤害类型是否为范围伤害*/
+	UPROPERTY()
+	bool bIsRadialDamage = false;
+
+	/*内半径：在此内半径范围内都将承受完整伤害*/
+	UPROPERTY()
+	float RadialDamageInnerRadius = 0.f;
+
+	/*外半径：在外半径中受到最小伤害如果设置0则不受伤害*/
+	UPROPERTY()
+	float RadialDamageOuterRadius = 0.f;
+
+	/*伤害源的中心点*/
+	UPROPERTY()
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 };
 
 template<>

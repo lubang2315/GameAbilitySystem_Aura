@@ -67,6 +67,9 @@ public:
 
 	/*Actor死亡委托*/
 	virtual FOnDeath& GetDeath() override;
+
+	/*获取受到范围伤害的委托*/
+	virtual FOnDamageSignature& GetDamageSignature() override;
 	
 	/*End*/
 
@@ -74,6 +77,8 @@ public:
 	FOnASCRegistered OnASCRegistered;
 	/*Actor死亡委托*/
 	FOnDeath OnDeath;
+	/*角色受到范围伤害的委托*/
+	FOnDamageSignature OnDamageSignature;
 	
 	/*设置人物类型*/
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
@@ -81,6 +86,9 @@ public:
 
 	/*获取人物类型*/
 	virtual ECharacterClass GetCharacterClass_Implementation() override;
+
+	/*覆写伤害给自身，在AuraDamageGameplayAbility中使用了ApplyRadialDamageWithFalloff他，他计算完按半径范围计算伤害后会调用此函数*/
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	
 protected:
 	virtual void BeginPlay() override;

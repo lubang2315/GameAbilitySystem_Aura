@@ -65,4 +65,13 @@ public:
 	/*获取可分配属性点数*/
 	UFUNCTION(BlueprintNativeEvent)
 	int32 GetSpellPoints() const;
+
+	/*显示魔法圈，并设置魔法圈贴画材质*/
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
+
+	/*隐藏魔法光圈*/
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void HideMagicCircle();
+	
 };

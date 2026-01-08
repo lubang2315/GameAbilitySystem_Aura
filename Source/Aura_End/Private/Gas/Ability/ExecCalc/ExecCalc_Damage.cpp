@@ -9,6 +9,7 @@
 #include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
 #include "Interface/CombotInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Math/UnitConversion.h"
 #include "Tags/AuraGameplayTags.h"
 
@@ -164,6 +165,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	}
 	
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	
 	const FGameplayTagContainer* OwnTag = Spec.CapturedSourceTags.GetAggregatedTags();
 	const FGameplayTagContainer* TargetTag = Spec.CapturedTargetTags.GetAggregatedTags();
@@ -246,6 +248,31 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		
 		DamageTypeValue *= (100.f - ResistanceValue)/100.f;
 		Damage += DamageTypeValue;
+		/*计算并应用范围半径伤害*/
+		if (UMyFunctionLibrary::GetIsRadialDamage(EffectContextHandle))
+		{
+			if (ICombotInterface* CombotInterface = Cast<ICombotInterface>(TargetCharacter))
+			{
+				CombotInterface->GetDamageSignature().AddLambda([&](float Damages)
+				{
+					DamageTypeValue = Damages;
+				});
+			}
+			/*使用虚幻引擎内置函数，根据半径分层计算伤害值*/
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+			TargetCharacter,
+			DamageTypeValue,
+			0.f,
+			UMyFunctionLibrary::GetRadialDamagetOrigin(EffectContextHandle),
+			UMyFunctionLibrary::GetRadialDamageInnerRadius(EffectContextHandle),
+			UMyFunctionLibrary::GetRadialDamageOuterRadius(EffectContextHandle),
+			1.f,
+			UDamageType::StaticClass(),
+			TArray<AActor*>(),
+			SourceCharacter,
+			nullptr
+			);
+		}
 	}
 	
 	
@@ -254,7 +281,6 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	const bool IsBlockDamage = FMath::RandRange(0,100) <= blockChance;
 
 	/*！通过自定义的函数传递是否阻挡攻击*/
-	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	UMyFunctionLibrary::SetIsBlockHit( EffectContextHandle,IsBlockDamage);
 	Damage = IsBlockDamage ? Damage*0.5f : Damage;
 	

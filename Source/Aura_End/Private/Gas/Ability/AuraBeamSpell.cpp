@@ -141,3 +141,5 @@ void UAuraBeamSpell::OnEndAbility(TArray<AActor*> AdditionalTarget)
 		}
 	}
 }
+
+

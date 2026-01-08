@@ -39,6 +39,7 @@ struct  FTaggedMontage
 /*委托*/
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered,UAbilitySystemComponent*)//传递ASC是否初始化完成
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath,AActor*,DeadActor);//传递Actor死亡
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSignature,float/*范围伤害造成的最终值*/);//返回范围伤害能够对自身造成的伤害，在TakeDamage里广播
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI,BlueprintType)
@@ -123,4 +124,7 @@ public:
 	/*设置玩家或敌人是否处于持续受击状态*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void SetIsBeingShocked(bool bIsBeingShocked);
+
+	/*角色受到范围伤害触发的委托*/
+	virtual FOnDamageSignature& GetDamageSignature() = 0;
 };

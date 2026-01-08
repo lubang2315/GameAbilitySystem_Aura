@@ -80,9 +80,6 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 	
 	/*Enemy敌人受击通知标签*/
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Effects.HitReact"),FString("Enemy HitReact Tag"));
-
-	/*雷击技能标签，这里没完善技能仅做测试*/
-	GameplayTags.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Lightning.Electrocute"),FString("技能雷击标签"));
 	
 	/*Enemy Attack tag*/
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"),FString("Enemy Attack Tag"));
@@ -108,9 +105,15 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 	
 	/*Aura Ability Tag*/
 	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBolt"),FString("FireBolt Ability Tag About Aura"));
-
+	/*雷击技能标签，这里没完善技能仅做测试*/
+	GameplayTags.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Lightning.Electrocute"),FString("技能雷击标签"));
+	/*奥数碎片技能*/
+	GameplayTags.Abilities_Arcane_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Arcane.ArcaneShards"),FString("奥数碎片技能标签"));
+	
 	/*Aura Ability CoolDown Tag*/
 	GameplayTags.CoolDown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CoolDown.Fire.FireBolt"),FString("FireBolt Ability CoolDown Tag About Aura"));
+	GameplayTags.CoolDown_Arcane_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CoolDown.Arcane.ArcaneShards"),FString("ArcaneShards Ability CoolDown Tag About Aura"));
+	
 	
 	/*Enemy蒙太奇攻击位置标签*/
 	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"),FString("使用武器攻击蒙太奇标签"));

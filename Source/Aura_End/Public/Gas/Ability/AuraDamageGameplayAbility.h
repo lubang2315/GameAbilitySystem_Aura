@@ -19,8 +19,16 @@ class AURA_END_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 public:
 	/*创建负面影响相关参数结构体*/
 	UFUNCTION(BlueprintPure)
-	FDamageEffectPrams MakeDamageEffectPramsFromClassDefault(AActor* TargetActor = nullptr) const;
-
+	FDamageEffectPrams MakeDamageEffectPramsFromClassDefault(
+		AActor* TargetActor = nullptr,
+		FVector InRadialDamageOrigin = FVector::ZeroVector,
+		bool bOverrideKnockbackDirection = false,
+		FVector KnockbackDirectionOverride = FVector::ZeroVector,
+		bool bOverrideDeathImpulse = false,
+		FVector DeathImpulseDirectionOverride = FVector::ZeroVector,
+		bool bOverridePitch = false,
+		float PitchOverride = 0.f) const;
+	
 	/*获取技能伤害*/
 	UFUNCTION(BlueprintPure)
 	float GetDamageAtLevel();
@@ -68,7 +76,20 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float KnockBackChance = 60.f;
 
-	/*被技能击中并造成击飞的概率*/
+	/*被技能击中并造成击飞的幅度*/
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float KnockBackMagnitude = 60.f;
+
+	/*设置该技能是否具有范围半径伤害*/
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	bool IsRadialDamage = false;
+
+	/*设置该技能范围半径伤害的内半径大小*/
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Damage")
+	float RadialDamageInnerRadius = 0.f;
+
+	/*设置该技能范围半径伤害的外半径伤害*/
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,  Category = "Damage")
+	float RadialDamageOuterRadius = 0.f;
+
 };

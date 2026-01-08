@@ -10,6 +10,7 @@
 #include "AuraPlayerController.generated.h"
 
 
+class AMagicCircle;
 class UNiagaraSystem;
 class UDamageTextComponent;
 class UAuraAbilitySystemComponent;
@@ -34,6 +35,14 @@ public:
 	/*在控制器端显示损伤敌人数值*/
 	UFUNCTION(Client, Reliable)
 	void ShowDamageNumber(float DamageAmount,ACharacter* TargerCharacter,bool IsBlockHit,bool IsCriticalHit);
+
+	/*显示魔法圈*/
+	UFUNCTION(BlueprintCallable)
+	void ShowMagicCircle(UMaterialInterface* DeaclMaterial);
+
+	/*隐藏魔法圈*/
+	UFUNCTION(BlueprintCallable)
+	void HideMagicCircle() const;
 	
 protected:
 	
@@ -103,4 +112,16 @@ private:
 	/*鼠标点击移动特效*/
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNiagaraSystem> ClickNiagaraComponent;
+
+	/*设置魔法圈的类型*/
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AMagicCircle> MagicCircleClass;
+
+	/*存储魔法圈实例*/
+	UPROPERTY()
+	TObjectPtr<AMagicCircle> MagicCircle;
+
+	/*每帧更新魔法圈位置*/
+	void UpdataMagicCircleLocation() const;
+	
 };

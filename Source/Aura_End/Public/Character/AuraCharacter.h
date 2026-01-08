@@ -46,6 +46,10 @@ public:
 	virtual int32 GetAttributePoints_Implementation() const override;
 	/*获取可分配的技能点数*/
 	virtual int32 GetSpellPoints_Implementation() const override;
+	/*显示魔法圈和设置贴画材质*/
+	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
+	/*隐藏魔法圈*/
+	virtual void HideMagicCircle_Implementation() override;
 	/*End*/
 
 	/*在C++里面写摄像机组件和弹簧臂，主要是可以方便获取旋转*/
@@ -74,5 +78,7 @@ private:
 	/*在升级后播放升级特效，在每个客户端都调用这个函数*/
 	UFUNCTION(NetMulticast,Reliable)
 	void MulticastLevelUpParticles() const;
+
+
 	
 };
