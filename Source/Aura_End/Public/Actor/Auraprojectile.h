@@ -34,20 +34,12 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
-
-
-
+	
 	UFUNCTION()
-	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex,bool bFromSweep,const FHitResult& SweepResult);
-private:
+	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex,bool bFromSweep,const FHitResult& SweepResult);
 
 	bool bHit = false;
-
-	UPROPERTY(EditDefaultsOnly)
-	float LifeSpan = 8.f;
 	
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USphereComponent> Sphere;
     /*播放FireBolt特效*/
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UNiagaraSystem> ImpactEffect;
@@ -60,9 +52,19 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UAudioComponent> LoopSoundComponent;
-	
+
+	UFUNCTION(BlueprintCallable)
 	virtual void Destroyed() override;
 
-	void PlayImpact() const;
+	/*火球销毁时播放销毁相关特效并停止循环声音播放*/
+	virtual void PlayImpact() ;
     /*End*/
+
+private:
+	UPROPERTY(EditDefaultsOnly)
+	float LifeSpan = 8.f;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USphereComponent> Sphere;
+	
 };

@@ -104,7 +104,10 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 
 	
 	/*Aura Ability Tag*/
+	/*火球技能*/
 	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBolt"),FString("FireBolt Ability Tag About Aura"));
+	/*火球爆炸技能*/
+	GameplayTags.Abilities_Fire_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBlast"),FString("FireBlast Ability Tag About Aura"));
 	/*雷击技能标签，这里没完善技能仅做测试*/
 	GameplayTags.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Lightning.Electrocute"),FString("技能雷击标签"));
 	/*奥数碎片技能*/
@@ -113,7 +116,7 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 	/*Aura Ability CoolDown Tag*/
 	GameplayTags.CoolDown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CoolDown.Fire.FireBolt"),FString("FireBolt Ability CoolDown Tag About Aura"));
 	GameplayTags.CoolDown_Arcane_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CoolDown.Arcane.ArcaneShards"),FString("ArcaneShards Ability CoolDown Tag About Aura"));
-	
+	GameplayTags.CoolDown_Fire_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CoolDown.Fire.FireBlast"),FString("FireBlast Ability CoolDown Tag About Aura"));
 	
 	/*Enemy蒙太奇攻击位置标签*/
 	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"),FString("使用武器攻击蒙太奇标签"));
@@ -141,5 +144,8 @@ void FMyGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Abilities_Passive_HaloOfProtection = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Passive.HaloOfProtection"),FString("被动技能守护光环"));
 	GameplayTags.Abilities_Passive_LifeSiphon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Passive.LifeSiphon"),FString("被动技能生命守护"));
 	GameplayTags.Abilities_Passive_ManaSiphon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Passive.ManaSiphon"),FString("被动技能蓝量守护"));
-	
+
+	/*效果标签*/
+	GameplayTags.GameplayCue_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameplayCue.FireBlast"),FString("效果标签：火球爆炸时标签"));
+
 }

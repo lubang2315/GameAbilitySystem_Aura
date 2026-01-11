@@ -559,3 +559,42 @@ void UMyFunctionLibrary::SetRadialDamagetOrigin(FGameplayEffectContextHandle& Ef
 	}
 }
 
+void UMyFunctionLibrary::SetIsRadialDamageEffectParams(FDamageEffectPrams& DamageEffectParams, bool bIsRadial,float InnerRadius, float OutRadius, FVector Origin)
+{
+	DamageEffectParams.bIsRadialDamage = bIsRadial;
+	DamageEffectParams.RadialDamageInnerRadius = InnerRadius;
+	DamageEffectParams.RadialDamageOuterRadius = OutRadius;
+	DamageEffectParams.RadialDamageOrigin = Origin;
+}
+
+void UMyFunctionLibrary::SetKnockbackDirection(FDamageEffectPrams& DamageEffectParams, FVector KnockbackDirection,float Magnitude)
+{
+	KnockbackDirection.Normalize();
+	if(Magnitude == 0.f)
+	{
+		DamageEffectParams.KnockBackForce = KnockbackDirection * DamageEffectParams.KnockBackMagnitude;
+	}
+	else
+	{
+		DamageEffectParams.KnockBackForce = KnockbackDirection * Magnitude;
+	}
+}
+
+void UMyFunctionLibrary::SetDeathImpulseDirection(FDamageEffectPrams& DamageEffectParams, FVector ImpulseDirection,float Magnitude)
+{
+	ImpulseDirection.Normalize();
+	if(Magnitude == 0.f)
+	{
+		DamageEffectParams.DeathImpulse = ImpulseDirection * DamageEffectParams.DeathImpulseMagnitude;
+	}
+	else
+	{
+		DamageEffectParams.DeathImpulse = ImpulseDirection * Magnitude;
+	}
+}
+
+void UMyFunctionLibrary::SetEffectParamsTargetASC(FDamageEffectPrams& DamageEffectParams,UAbilitySystemComponent* InASC)
+{
+	DamageEffectParams.TargetAbilitySystemComponent = InASC;
+}
+

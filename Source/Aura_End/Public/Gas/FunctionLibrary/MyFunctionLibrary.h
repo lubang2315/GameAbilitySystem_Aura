@@ -180,7 +180,22 @@ public:
 	/*设置当前GE范围伤害的中心点*/
 	UFUNCTION(BlueprintPure,Category = "MyAbilitySystemLibrary|GameplayEffect")
 	static void SetRadialDamagetOrigin(UPARAM(ref)  FGameplayEffectContextHandle& EffectContextHandle,FVector InRadialDamagetOrigin);
-	
+
+	/*在这里创建范围伤害的参数的函数，主要是为了可以在运行中技能Actor位置动态改变同时，伤害范围的释放点的参数始终正常，以下四个参数函数都是为了在运行中改变*/
+	/*修改伤害配置项，将其设置为具有范围伤害的配置项*/
+	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|GameplayEffect")
+	static void SetIsRadialDamageEffectParams(UPARAM(ref) FDamageEffectPrams& DamageEffectParams, bool bIsRadial, float InnerRadius, float OutRadius, FVector Origin);
+	/*修改伤害的冲击力的方向*/
+	UFUNCTION(BlueprintCallable, Category="RPGAbilitySystemLibrary|GameplayEffects")
+	static void SetKnockbackDirection(UPARAM(ref) FDamageEffectPrams& DamageEffectParams, FVector KnockbackDirection, float Magnitude = 0.f);
+	/*修改致命伤害的冲击力的方向*/
+	UFUNCTION(BlueprintCallable, Category="RPGAbilitySystemLibrary|GameplayEffects")
+	static void SetDeathImpulseDirection(UPARAM(ref) FDamageEffectPrams& DamageEffectParams, FVector ImpulseDirection, float Magnitude = 0.f);
+	/*设置伤害配置应用目标ASC*/
+	UFUNCTION(BlueprintCallable, Category="RPGAbilitySystemLibrary|GameplayEffects")
+	static void SetEffectParamsTargetASC(UPARAM(ref) FDamageEffectPrams& DamageEffectParams, UAbilitySystemComponent* InASC);
+
+	/*End*/
 };
 
 

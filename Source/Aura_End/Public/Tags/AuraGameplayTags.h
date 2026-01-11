@@ -88,8 +88,9 @@ public:
 	/*受击技能标签*/
 	FGameplayTag Abilities_HitReact;
 
-	/*Aura Ability Tag:火球术，雷击，奥数碎片*/
+	/*Aura Ability Tag:火球术，火球爆炸，雷击，奥数碎片*/
 	FGameplayTag Abilities_Fire_FireBolt;
+	FGameplayTag Abilities_Fire_FireBlast;
 	FGameplayTag Abilities_Lightning_Electrocute;
 	FGameplayTag Abilities_Arcane_ArcaneShards;
 	
@@ -110,6 +111,7 @@ public:
 	/*Aura Ability CoolDown Tag*/
 	FGameplayTag CoolDown_Fire_FireBolt;
 	FGameplayTag CoolDown_Arcane_ArcaneShards;
+	FGameplayTag CoolDown_Fire_FireBlast;
 
 	/*Enemy蒙太奇攻击位置标签*/
 	FGameplayTag CombatSocket_Weapon;
@@ -136,6 +138,9 @@ public:
 	FGameplayTag Abilities_Passive_HaloOfProtection;
 	FGameplayTag Abilities_Passive_LifeSiphon;
 	FGameplayTag Abilities_Passive_ManaSiphon;
+
+	/*效果标签:火焰爆炸时标签*/
+	FGameplayTag GameplayCue_FireBlast;
 	
 private:
 	static FMyGameplayTags GameplayTags;
