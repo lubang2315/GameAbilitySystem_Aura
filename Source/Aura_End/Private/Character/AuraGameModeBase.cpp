@@ -10,11 +10,8 @@
 void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlot, int32 SlotIndex)
 {
 	/*首先检查是否有对应的文档存在，如果有先删除对应的文档，然后在创建新文档，如果没有直接创建新文档*/
-	if (UGameplayStatics::DoesSaveGameExist(LoadSlot->GetWidgetName(),SlotIndex))
-	{
-		/*删除已经存在的存档*/
-		UGameplayStatics::DeleteGameInSlot(LoadSlot->GetWidgetName(),SlotIndex);
-	}
+	DelegateSlotData(LoadSlot->GetName(), SlotIndex);
+	
 	/*在该槽位创建新的存档*/
 	USaveGame* SaveGameObject = UGameplayStatics::CreateSaveGameObject(LoadScreenSaveGameClass);
 	ULoadScreenSaveGame* LoadScreenSaveGame = Cast<ULoadScreenSaveGame>(SaveGameObject);
@@ -24,6 +21,7 @@ void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlot, int32 SlotI
 	LoadScreenSaveGame->SlotIndex = SlotIndex;
 	LoadScreenSaveGame->SlotName = LoadSlot->GetWidgetName();
 	LoadScreenSaveGame->SlotStatus = Taken;
+	LoadScreenSaveGame->LoadMap = LoadSlot->GetLoadMap();
 
 	/*设置完数据后存档*/
 	UGameplayStatics::SaveGameToSlot(LoadScreenSaveGame,LoadSlot->GetWidgetName(),SlotIndex);
@@ -50,4 +48,32 @@ ULoadScreenSaveGame* AAuraGameModeBase::GetLoadScreenSaveGame(const FString& Sav
 	return LoadScreenSaveGame;
 	
 	
+}
+
+void AAuraGameModeBase::DelegateSlotData(const FString& SaveSlotName, int32 SlotIndex)
+{
+	/*首先检查是否有对应的文档存在，如果有先删除对应的文档，然后在创建新文档，如果没有直接创建新文档*/
+	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName,SlotIndex))
+	{
+		/*删除已经存在的存档*/
+		UGameplayStatics::DeleteGameInSlot(SaveSlotName,SlotIndex);
+	}
+}
+
+void AAuraGameModeBase::TravelToMap(UMVVM_LoadSlot* Slot)
+{
+	/*获取此存档相关信息，目前还没有使用*/
+	const FString SlotName = Slot->GetWidgetName();
+	const int32 SlotIndex = Slot->SlotIndex;
+	
+	/*切换关卡*/
+	UGameplayStatics::OpenLevelBySoftObjectPtr(Slot,Maps.FindChecked(Slot->GetLoadMap()));
+}
+
+void AAuraGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	/*添加一个默认地图到映射中*/
+	Maps.Add(DefaultMapName,DefaultMap);
 }

@@ -34,4 +34,25 @@ public:
 	/*存档使用的数据结构类*/
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<USaveGame> LoadScreenSaveGameClass;
+
+	/*删除相应的游戏存档*/
+	static  void DelegateSlotData(const FString& SaveSlotName/*存档名称*/,int32 SlotIndex/*存档索引*/);
+
+	/*默认地图名称*/
+	UPROPERTY(EditDefaultsOnly)
+	FString DefaultMapName;
+
+	/*默认起始地图*/
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UWorld> DefaultMap;
+
+	/*所有可存档地图*/
+	TMap<FString,TSoftObjectPtr<UWorld>> Maps;
+
+	/*根据传入参数进行关卡切换*/
+	void TravelToMap(UMVVM_LoadSlot* Slot);
+
+protected:
+	virtual void BeginPlay() override;
+	
 };
