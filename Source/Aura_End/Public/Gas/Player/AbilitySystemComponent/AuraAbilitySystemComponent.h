@@ -10,7 +10,8 @@
  * 
  */
 
-DECLARE_MULTICAST_DELEGATE_OneParam(EffectAssetTag,const FGameplayTagContainer& /*AssetTag*/)
+class ULoadScreenSaveGame;
+DECLARE_MULTICAST_DELEGATE_OneParam(EffectAssetTag, const FGameplayTagContainer& /*AssetTag*/)
 /*下面这个委托，技能初始化后调用的委托，目前只是通知技能UI，技能已经初始化完成可以获取技能信息，并加载到OverlayUI里面的技能栏*/
 DECLARE_MULTICAST_DELEGATE(FAbilityGiven)
 /*遍历已经激活的技能*/
@@ -51,6 +52,9 @@ public:
 
 	/*被动技能特效激活状态委托*/
 	FActivatePassiveEffect ActivatePassiveEffectDelegate;
+
+	/*根据存档数据进行激活技能，此函数主要用于新进游戏以存档数据启动游戏*/
+	void AddCharacterAbilitiesFromSaveGameData(ULoadScreenSaveGame* SaveGameData);
 	
 	/*添加能力，注意能力在添加后要使用还要激活 *ActivateGA**/
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);

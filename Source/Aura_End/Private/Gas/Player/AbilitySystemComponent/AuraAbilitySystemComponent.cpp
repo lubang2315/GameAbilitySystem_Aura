@@ -27,6 +27,38 @@ void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 			);*/
 }
 
+void UAuraAbilitySystemComponent::AddCharacterAbilitiesFromSaveGameData(ULoadScreenSaveGame* SaveGameData)
+{
+	UE_LOG(LogAura, Warning, TEXT("Loading %d abilities from save data"), SaveGameData->SaveAbilities.Num());
+	for (const FSaveAbility& Data : SaveGameData->SaveAbilities)
+	{
+		const TSubclassOf<UGameplayAbility> LoadedAbilityClass = Data.GameplayAbility;
+
+		FGameplayAbilitySpec LoadedAbilitySpec = FGameplayAbilitySpec(LoadedAbilityClass, Data.AbilityLevel);
+
+		LoadedAbilitySpec.DynamicAbilityTags.AddTag(Data.AbilityInputTag);
+		LoadedAbilitySpec.DynamicAbilityTags.AddTag(Data.AbilityStatus);
+		if (Data.AbilityType == FMyGameplayTags::Get().Abilities_Type_Offensive)
+		{
+			GiveAbility(LoadedAbilitySpec);
+		}
+		else if (Data.AbilityType == FMyGameplayTags::Get().Abilities_Type_Passive)
+		{
+			if (Data.AbilityStatus.MatchesTagExact(FMyGameplayTags::Get().Abilities_Status_Equipped))
+			{
+				GiveAbilityAndActivateOnce(LoadedAbilitySpec);
+				MulticastActivatePassiveEffect(Data.AbilityTag, true);
+			}
+			else
+			{
+				GiveAbility(LoadedAbilitySpec);
+			}
+		}
+	}
+	bStartupAbilityGiven = true;
+	AbilityGivenDelegate.Broadcast();
+}
+
 void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
 {
 	for (TSubclassOf<UGameplayAbility> AbilityClass : StartupAbilities)
@@ -48,6 +80,7 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSub
 	for (TSubclassOf<UGameplayAbility> AbilityClass : StartupPassiveAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass,1);
+		AbilitySpec.DynamicAbilityTags.AddTag(FMyGameplayTags::Get().Abilities_Status_Equipped);
 		GiveAbilityAndActivateOnce(AbilitySpec);
 	}
 	
@@ -324,6 +357,8 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 	    			MulticastActivatePassiveEffect(AbilityTag,true);
 	    			TryActivateAbility(Spec->Handle);
 	    		}
+	    		Spec->DynamicAbilityTags.RemoveTag(GetStatusTagFromSpec(*Spec));
+	    		Spec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Equipped);
 	    	}
              
 	    	/*修改技能装备的插槽*/

@@ -48,11 +48,18 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category = "Class Defaults")
 	TMap<ECharacterClass,FCharacterClassDefaultInfo> CharacterClassInformation;
 
+	/*主要用于加载存档的属性*/
+	UPROPERTY(EditDefaultsOnly,Category = "Commit Class Defaults")
+	TSubclassOf<UGameplayEffect> PrimaryAttributes_SetByCaller;
+
 	UPROPERTY(EditDefaultsOnly,Category = "Commit Class Defaults")
 	TSubclassOf<UGameplayEffect> VitalAttributes;
 
 	UPROPERTY(EditDefaultsOnly,Category = "Commit Class Defaults")
 	TSubclassOf<UGameplayEffect> SecondaryAttributes;
+
+	UPROPERTY(EditDefaultsOnly,Category = "Commit Class Defaults")
+	TSubclassOf<UGameplayEffect> SecondaryAttributes_Infinite;
 
 	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass);
 

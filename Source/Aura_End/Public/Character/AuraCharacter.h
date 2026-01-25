@@ -50,6 +50,8 @@ public:
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	/*隐藏魔法圈*/
 	virtual void HideMagicCircle_Implementation() override;
+	/*保存游戏进度：出生点*/
+	virtual void SaveProgress_Implementation(const FName& CheckPointTag) override;
 	/*End*/
 
 	/*在C++里面写摄像机组件和弹簧臂，主要是可以方便获取旋转*/
@@ -69,6 +71,9 @@ public:
 
 	/*受到眩晕阻止玩家移动*/
 	virtual void OnRep_Burn() override;
+
+	/*加载存档函数*/
+	void LoadProgress() const;
 
 private:
 	virtual void InitAbilityActorInfo() override;

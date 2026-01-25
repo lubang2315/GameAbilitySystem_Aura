@@ -59,6 +59,10 @@ void AAuraHUDBase::InitOverlay(APlayerController* PC, APlayerState* PS, UAbility
 
 	const FWidgetControllerParams WidgetControllerParams(PC,PS,ASC,AS);
 	OverlayWidgetController = GetOverlayWidgetController(WidgetControllerParams);
+	/*初始化所有控制器*/
+	GetAttributeMenuWidgetController(WidgetControllerParams);
+	GetSpellMenuWidgetController(WidgetControllerParams);
+	
     /**把值传给AuraUserWidget*/
 	OverlayWidget->SetWidgetController(OverlayWidgetController);
 	/**广播初始值给HUD*/

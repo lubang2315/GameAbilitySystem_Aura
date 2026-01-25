@@ -5,8 +5,10 @@
 
 #include "CoreMinimal.h"
 #include "GameplayEffectTypes.h"
+#include "Gas/DataAsset/AbilityInfo.h"
 #include "Gas/DataAsset/CharacterClassInfo.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "SaveGame/LoadScreenSaveGame.h"
 #include "MyFunctionLibrary.generated.h"
 
 struct FDamageEffectPrams;
@@ -39,6 +41,10 @@ public:
 	UFUNCTION(BlueprintCallable,Category = "FunctionLibrary|CharacterClassInfo")
 	static void InitializeDefaultAttribute(float Lever,ECharacterClass CharacterClass,UAbilitySystemComponent* EnemyASC,const UObject* WordContextObject);
 
+	/*从存档初始化角色属性*/
+	UFUNCTION(BlueprintCallable,Category = "FunctionLibrary|CharacterClassInfo")
+	static void InitializeDefaultAttributeFromSaveData(const UObject* WorldContextObject,UAbilitySystemComponent* ASC,ULoadScreenSaveGame* SaveGame);
+	
 	UFUNCTION(BlueprintCallable,Category = "MyAbilitySystemLibrary|CharaterClassDefaults")
 	static void GiveStartupAbilities(const UObject* WordContextObject,UAbilitySystemComponent* EnemyASC,ECharacterClass CharacterClass);
 	/*获取玩家属性技能相关信息*/

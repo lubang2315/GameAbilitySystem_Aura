@@ -49,9 +49,28 @@ public:
 	/*所有可存档地图*/
 	TMap<FString,TSoftObjectPtr<UWorld>> Maps;
 
+	/*玩家出生点，按标签存储，注意不能存在空格*/
+	UPROPERTY(EditDefaultsOnly)
+	FName PlayerStartTag;
+
 	/*根据传入参数进行关卡切换*/
 	void TravelToMap(UMVVM_LoadSlot* Slot);
 
+	/*覆写父类GameModeBase中的选择玩家出生点，用于可以根据标签选择玩家出生点*/
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
+	/*获取到当前游戏进行中所使用的存档数据*/
+	ULoadScreenSaveGame* RetrieveInGameSaveData() const;
+
+	/*保存游戏的进度*/
+	void SaveGameProgress(ULoadScreenSaveGame* SaveGameData) const;
+
+	/*保存关卡中的状态到存档中*/
+	void SaveWorldState(UWorld* World) const;
+
+	/*从存档中加载当前关卡信息*/
+	void LoadWorldState(UWorld* World) const;
+	
 protected:
 	virtual void BeginPlay() override;
 	

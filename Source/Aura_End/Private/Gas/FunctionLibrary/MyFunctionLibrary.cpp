@@ -70,8 +70,7 @@ USpellMenuWidgetController* UMyFunctionLibrary::GetSpellMenuWidgetController(con
 	return nullptr;
 }
 
-void UMyFunctionLibrary::InitializeDefaultAttribute(float Lever, ECharacterClass CharacterClass,
-                                                    UAbilitySystemComponent* EnemyASC, const UObject* WordContextObject)
+void UMyFunctionLibrary::InitializeDefaultAttribute(float Lever, ECharacterClass CharacterClass,UAbilitySystemComponent* EnemyASC, const UObject* WordContextObject)
 {
 	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WordContextObject));
 	if (GameMode == nullptr) return;
@@ -97,9 +96,49 @@ void UMyFunctionLibrary::InitializeDefaultAttribute(float Lever, ECharacterClass
 	VitalHandle.AddSourceObject(AvactorActor);
 	FGameplayEffectSpecHandle VitalAttribute = EnemyASC->MakeOutgoingSpec(CharacterClassInfo->VitalAttributes,Lever,VitalHandle);
 	EnemyASC->ApplyGameplayEffectSpecToSelf(*VitalAttribute.Data.Get());
-
-	GEngine->AddOnScreenDebugMessage(1,1,FColor::Black,FString::Printf(TEXT("HelloWord")));
 	
+	
+}
+
+void UMyFunctionLibrary::InitializeDefaultAttributeFromSaveData(const UObject* WorldContextObject,UAbilitySystemComponent* ASC, ULoadScreenSaveGame* SaveGame)
+{
+	/*获取标签*/
+	FMyGameplayTags MyGameplayTags = FMyGameplayTags::Get();
+	
+	/*获取源对象*/
+	const AActor* SourceActor = ASC->GetAvatarActor();
+
+	/*从实例获取关卡角色配置*/
+	UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if (CharacterClassInfo == nullptr) return;
+	
+	/*创建上下文句柄*/
+	FGameplayEffectContextHandle EffectContextHandle = ASC->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(SourceActor);
+	
+	/*创建GE规格句柄*/
+	FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->PrimaryAttributes_SetByCaller,1.f,EffectContextHandle);
+
+	/*配置规格里面的具体参数*/
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,MyGameplayTags.Attributes_Primary_Strength,SaveGame->Strength);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,MyGameplayTags.Attributes_Primary_Intelligence,SaveGame->Intelligence);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,MyGameplayTags.Attributes_Primary_Resilience,SaveGame->Resistance);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,MyGameplayTags.Attributes_Primary_Vigor,SaveGame->Vigor);
+
+	/*应用属性*/
+	ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+
+	/*应用次要属性*/
+	FGameplayEffectContextHandle SecondaryHandle = ASC->MakeEffectContext();
+	SecondaryHandle.AddSourceObject(SourceActor);
+	FGameplayEffectSpecHandle SecondaryAttribute = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttributes_Infinite,1.f,SecondaryHandle);
+	ASC->ApplyGameplayEffectSpecToSelf(*SecondaryAttribute.Data.Get());
+
+	/*应用血量和蓝量*/
+	FGameplayEffectContextHandle VitalHandle = ASC->MakeEffectContext();
+	VitalHandle.AddSourceObject(SourceActor);
+	FGameplayEffectSpecHandle VitalAttribute = ASC->MakeOutgoingSpec(CharacterClassInfo->VitalAttributes,1.f,VitalHandle);
+	ASC->ApplyGameplayEffectSpecToSelf(*VitalAttribute.Data.Get());
 }
 
 void UMyFunctionLibrary::GiveStartupAbilities(const UObject* WordContextObject, UAbilitySystemComponent* EnemyASC,ECharacterClass CharacterClass)

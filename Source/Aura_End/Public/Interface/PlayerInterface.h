@@ -73,5 +73,9 @@ public:
 	/*隐藏魔法光圈*/
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void HideMagicCircle();
+
+	/*保存游戏进程接口*/
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SaveProgress(const FName& CheckPointTag);
 	
 };

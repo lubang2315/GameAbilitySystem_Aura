@@ -34,6 +34,7 @@ class UAuraAbilitySystemComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature,float,NewAttribute);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature,FUIWidgetRow,Row);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLeverChangedSignature,int32,Lever,bool,bIsPlayLeverUpMotation);
 
 
 /**
@@ -70,7 +71,7 @@ public:
 
 	/*广播玩家等级*/
 	UPROPERTY(BlueprintAssignable, Category="GAS|Level")
-	FOnPlayerStateChangedSignature OnPlayerLevelChangedDelegate;
+	FOnLeverChangedSignature OnPlayerLevelChangedDelegate;
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Category="Widget Data")

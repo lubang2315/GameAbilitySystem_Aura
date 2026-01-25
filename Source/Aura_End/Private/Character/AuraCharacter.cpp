@@ -13,7 +13,12 @@
 #include "Gas/Player/AbilitySystemComponent/AuraAbilitySystemComponent.h"
 #include "UI/HUD/AuraHUDBase.h"
 #include "NiagaraComponent.h"
+#include "Aura_End/AuraAbilityInfoLogChannels.h"
+#include "Character/AuraGameModeBase.h"
 #include "Gas/Debuff/DebuffNiagaraComponent.h"
+#include "Gas/FunctionLibrary/MyFunctionLibrary.h"
+#include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tags/AuraGameplayTags.h"
 
 AAuraCharacter::AAuraCharacter()
@@ -54,8 +59,127 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	InitAbilityActorInfo();
-	AddCharacterAbilities();/*添加并激活能力一次*/
+	/*开始游戏加载存档*/
+	LoadProgress();
+	//AddCharacterAbilities();/*添加并激活能力一次*/
+
+	/*加载存档中关于场景中Actor信息*/
+	if (AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
+	{
+		AuraGameMode->LoadWorldState(GetWorld());
+	}
 }
+
+void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
+{
+	/*先获取游戏模式，在游戏模式中我们写好了关于存档相关函数*/
+	if (const AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
+	{
+		/*获取存档*/
+		ULoadScreenSaveGame* SaveGame = AuraGameModeBase->RetrieveInGameSaveData();
+		if (SaveGame == nullptr) return;
+		
+		/*更新并保存出生点标签*/
+		SaveGame->PlayerStartTag = CheckPointTag;
+
+		/*更新并保存玩家状态*/
+		if (AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(GetPlayerState()))
+		{
+			SaveGame->Level = AuraPlayerState->GetPlayerLevel();
+			SaveGame->XP = AuraPlayerState->GetPlayerXP();
+			SaveGame->AttributePoint = AuraPlayerState->GetPlayerAttributePoints();
+			SaveGame->SpellPoint = AuraPlayerState->GetPlayerSpellPoints();
+		}
+		/*更新并保存玩家主要属性*/
+		SaveGame->Strength = UAuraAttributeSet::GetStrengthAttribute().GetNumericValue(GetAttributeSet());
+		SaveGame->Intelligence = UAuraAttributeSet::GetIntelligenceAttribute().GetNumericValue(GetAttributeSet());
+		SaveGame->Resistance = UAuraAttributeSet::GetResilienceAttribute().GetNumericValue(GetAttributeSet());
+		SaveGame->Vigor = UAuraAttributeSet::GetVigorAttribute().GetNumericValue(GetAttributeSet());
+
+		/*告诉下次从此存档进入游戏而不是加载空白文档*/
+		SaveGame->bFirstTimeLoadIn = false;
+
+		/*保存角色技能相关*/
+		/*判断是不是在服务器运行*/
+		if (!HasAuthority()) return;
+
+		/*获取AuraASC*/
+		UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent);
+		
+		/*使用AuraASC中创建的ForEachAbility函数循环，获取所有可激活技能规格*/
+		FForEachAbility SaveGameAbilityDelegate;
+
+		/*在添加技能进存档里面的数组里面时先清空数组*/
+		SaveGame->SaveAbilities.Empty();
+
+		SaveGameAbilityDelegate.BindLambda([this,AuraASC,SaveGame](const FGameplayAbilitySpec& AbilitySpec)
+		{
+			/*获取技能标签，和技能信息*/
+			FGameplayTag AbilityTag = UAuraAbilitySystemComponent::GetAbilityTagFromSpec(AbilitySpec);
+			UAbilityInfo* AbilityInfo = UMyFunctionLibrary::GetAbilityInfo(this);
+			FAuraAbilityInfo AuraAbilityInfo = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+
+			/*创建技能结构体并填充参数保存*/
+			FSaveAbility SavedAbility;
+			SavedAbility.GameplayAbility = AuraAbilityInfo.Ability;
+			SavedAbility.AbilityLevel = AbilitySpec.Level;
+			SavedAbility.AbilityInputTag = AuraASC->GetInputTagFromAbilityTag(AbilityTag);
+			SavedAbility.AbilityStatus = AuraASC->GetStatusFromAbilityTag(AbilityTag);
+			SavedAbility.AbilityTag = AbilityTag;
+			SavedAbility.AbilityType = AuraAbilityInfo.AbilityTypeTag;
+
+			/*添加进存档*/
+			SaveGame->SaveAbilities.AddUnique(SavedAbility);
+		});
+
+		/*调用ForEachAbility来执行存储到存档*/
+		AuraASC->FForEachAbility(SaveGameAbilityDelegate);
+		
+		/*保存数据*/
+		AuraGameModeBase->SaveGameProgress(SaveGame);
+		UE_LOG(LogAura, Warning, TEXT("1技能 %d 数量"), SaveGame->SaveAbilities.Num());
+		
+	}
+}
+
+void AAuraCharacter::LoadProgress() const
+{
+	/*先获取游戏模式，在游戏模式中我们写好了关于存档相关函数*/
+	if (const AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
+	{
+		/*获取存档*/
+		ULoadScreenSaveGame* SaveGame = AuraGameModeBase->RetrieveInGameSaveData();
+		if (SaveGame == nullptr) return;
+		
+		/*判断是不是第一次加载存档，如果是第一次直接使用默认GE初始化属性，初始化角色技能*/
+		if (SaveGame->bFirstTimeLoadIn)
+		{
+			InitializePrimaryAttributes();
+			AddCharacterAbilities();
+		}
+		else
+		{
+			/*加载技能，在作者看来对于技能加载宜在GAS中进行*/
+			if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+			{
+				UE_LOG(LogAura, Warning, TEXT("2技能 %d 数量"), SaveGame->SaveAbilities.Num());
+				AuraASC->AddCharacterAbilitiesFromSaveGameData(SaveGame);
+			}
+			
+			/*从存档数据中获取数据并设置玩家状态*/
+			if (AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(GetPlayerState()))
+			{
+				AuraPlayerState->SetXP(SaveGame->XP);
+				AuraPlayerState->SetLevel(SaveGame->Level);
+				AuraPlayerState->SetAttributePoints(SaveGame->AttributePoint);
+				AuraPlayerState->SetSpellPoints(SaveGame->SpellPoint);
+			}
+			UMyFunctionLibrary::InitializeDefaultAttributeFromSaveData(this,AbilitySystemComponent,SaveGame);
+		}
+	}
+		
+}
+
 
 void AAuraCharacter::OnRep_PlayerState()
 {
@@ -177,6 +301,8 @@ void AAuraCharacter::HideMagicCircle_Implementation()
 	}
 }
 
+
+
 void AAuraCharacter::OnRep_Stunned()
 {
 	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
@@ -213,6 +339,7 @@ void AAuraCharacter::OnRep_Burn()
 	}
 }
 
+
 void AAuraCharacter::InitAbilityActorInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
@@ -230,7 +357,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 		HUD->InitOverlay(AuraPlayerController,AuraPlayerState,AbilitySystemComponent,AttributeSet);
 	 }
 	}
-	InitializePrimaryAttributes();
+	/*后期我们加入了存档机制，进入行存档进入游戏我们需要判断需不需要加载存档数据还是新建空白文档所以在这里加载不合适了*/
+	//InitializePrimaryAttributes();
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
 
 	/*注册监听负面眩晕回调*/

@@ -24,7 +24,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	GetAuraPlayerState()->OnXPChangedDelegate.AddUObject(this,&UOverlayWidgetController::OnXPChanged);
 
 	/*绑定回调并直接广播玩家等级*/
-	GetAuraPlayerState()->OnLevelChangedDelegate.AddLambda([this](int32 NewValue){OnPlayerLevelChangedDelegate.Broadcast(NewValue);});
+	GetAuraPlayerState()->OnLevelChangedDelegate.AddLambda([this](int32 NewValue,bool bIsPlayLeverUpMotation){OnPlayerLevelChangedDelegate.Broadcast(NewValue,bIsPlayLeverUpMotation);});
 	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetHPAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnHPChangedEvent.Broadcast(Data.NewValue);});
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetMaxHpAttribute()).AddLambda([this](const FOnAttributeChangeData& Data){OnMaxHPChangedEvent.Broadcast(Data.NewValue);});

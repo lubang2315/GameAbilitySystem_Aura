@@ -10,6 +10,7 @@
 
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChanged, int32)
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLeverChanged, int32,bool);
 
 class ULevelUpInfo;
 /**
@@ -30,7 +31,7 @@ public:
 	TObjectPtr<ULevelUpInfo> LevelUpInfo;
 	
 	/*等级，经验值,属性点，技能点变化委托*/
-	FOnPlayerStateChanged OnLevelChangedDelegate;
+	FOnLeverChanged OnLevelChangedDelegate;
 	FOnPlayerStateChanged OnXPChangedDelegate;
 	FOnPlayerStateChanged OnAttributePointsChangedDelegate;
 	FOnPlayerStateChanged OnSpellPointsChangedDelegate;
