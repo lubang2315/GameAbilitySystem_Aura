@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Gas/DataAsset/LootTiers.h"
 #include "SaveGame/LoadScreenSaveGame.h"
 #include "AuraGameModeBase.generated.h"
 
@@ -47,7 +48,11 @@ public:
 	TSoftObjectPtr<UWorld> DefaultMap;
 
 	/*所有可存档地图*/
+	UPROPERTY(EditDefaultsOnly)
 	TMap<FString,TSoftObjectPtr<UWorld>> Maps;
+
+	/*根据地图资产名称获取地图名称,在此作用主要是显示存档页面中地图名称*/
+	FString GatMapNameFromMapAssetName(const FString& MapAssetName) const;
 
 	/*玩家出生点，按标签存储，注意不能存在空格*/
 	UPROPERTY(EditDefaultsOnly)
@@ -66,10 +71,17 @@ public:
 	void SaveGameProgress(ULoadScreenSaveGame* SaveGameData) const;
 
 	/*保存关卡中的状态到存档中*/
-	void SaveWorldState(UWorld* World) const;
+	void SaveWorldState(UWorld* World,const FString& DestinationMapAssetName = FString("")) const;
 
 	/*从存档中加载当前关卡信息*/
 	void LoadWorldState(UWorld* World) const;
+
+	/*角色死亡调用此函数*/
+	void PlayerDied(const ACharacter* DeadCharater) const;
+
+	/*战利品数据配置*/
+	UPROPERTY(EditDefaultsOnly, Category="Loot Tiers")
+	TObjectPtr<ULootTiers> LootTiers;
 	
 protected:
 	virtual void BeginPlay() override;

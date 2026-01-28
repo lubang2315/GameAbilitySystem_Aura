@@ -27,6 +27,12 @@ AAuraEnemy::AAuraEnemy()
     HPWidget = CreateDefaultSubobject<UWidgetComponent>("Widget");
     HPWidget->SetupAttachment(GetRootComponent());
 
+    /*预设敌人描边颜色*/
+    GetMesh()->SetCustomDepthStencilValue(Custom_Depth_CharacterStroke);
+    Weapon->SetCustomDepthStencilValue(Custom_Depth_CharacterStroke);
+    GetMesh()->MarkRenderStateDirty();
+    Weapon->MarkRenderStateDirty();
+
     /*设置敌人在被AIController控制追踪玩家时转向更线性，在蓝图可以设置但这里在代码里面写死，以免错误*/
     bUseControllerRotationPitch = false;
     bUseControllerRotationYaw = false;
@@ -67,19 +73,22 @@ void AAuraEnemy::PossessedBy(AController* NewController)
     AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"),CharacterClass != ECharacterClass::Warrior);
 }
 
-void AAuraEnemy::HighLightActor()
+void AAuraEnemy::HighLightActor_Implementation()
 {
     GetMesh()->SetRenderCustomDepth(true);
-    GetMesh()->SetCustomDepthStencilValue(Custom_Depth_CharacterStroke);
     Weapon->SetRenderCustomDepth(true);
-    Weapon->SetCustomDepthStencilValue(Custom_Depth_CharacterStroke);
     
 }
 
-void AAuraEnemy::UnHighLightActor()
+void AAuraEnemy::UnHighLightActor_Implementation()
 {
     GetMesh()->SetRenderCustomDepth(false);
     Weapon->SetRenderCustomDepth(false);
+}
+
+void AAuraEnemy::SetMoveToLocation_Implementation(FVector& OutDestination)
+{
+    /*在敌人这里不修改移动位置*/
 }
 
 void AAuraEnemy::InitAbilityActorInfo()
@@ -169,6 +178,7 @@ void AAuraEnemy::Die(const FVector& DeathImpulse)
     {
         AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"),true);
     }
+    SpawnLoot();
     Super::Die(DeathImpulse);
 }
 

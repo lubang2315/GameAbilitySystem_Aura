@@ -84,15 +84,19 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Character Class Default");
 	ECharacterClass CharacterClass = ECharacterClass::Warrior;
 
+	/*在其他地方也可以设置敌人类型*/
+	void SetEnemyClass(ECharacterClass NewClass) {CharacterClass = NewClass;}
+	
 	/*获取人物类型*/
 	virtual ECharacterClass GetCharacterClass_Implementation() override;
 
 	/*覆写伤害给自身，在AuraDamageGameplayAbility中使用了ApplyRadialDamageWithFalloff他，他计算完按半径范围计算伤害后会调用此函数*/
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	
+
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(BlueprintReadOnly)
 	bool bDead = false;
 
 	/*是否处于眩晕Debuff效果*/

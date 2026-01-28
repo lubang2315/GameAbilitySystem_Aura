@@ -8,6 +8,7 @@
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "ShaderPrintParameters.h"
 #include "Actor/MagicCircle.h"
 #include "Aura_End/Aura_End.h"
 #include "Components/DecalComponent.h"
@@ -142,8 +143,8 @@ void AAuraPlayerController::CursorTrace()
 	{
 		/*如果有些技能触发，需要阻止光标射线监测，在此通过标签即可阻止,同时清除相关操作*/
 		/*鼠标拾取比较费性能，在不需要时候阻止*/
-		if (ThisActor) ThisActor->UnHighLightActor();
-		if (LastActor) ThisActor->UnHighLightActor();
+		UnHighHlightActor(LastActor);
+		UnHighHlightActor(ThisActor);
 		ThisActor =nullptr;
 		LastActor =nullptr;
 		return;
@@ -155,13 +156,36 @@ void AAuraPlayerController::CursorTrace()
 	if (!HitResult.bBlockingHit) return;
 	
     LastActor = ThisActor;
-	//ThisActor = Cast<IEnemyInterface>(HitResult.GetActor());
-	ThisActor = HitResult.GetActor();
-//以下是几种情况
+	//获取拾取的Actor，判断Actor是否继承高亮接口
+	if(IsValid(HitResult.GetActor()) && HitResult.GetActor()->Implements<UHighLightInterface>())
+	{
+		ThisActor = HitResult.GetActor();
+	}
+	else
+	{
+		ThisActor = nullptr;
+	}
+    //以下是几种情况
 	if (LastActor != ThisActor)
 	{
-		if (LastActor) {LastActor->UnHighLightActor();}
-		if (ThisActor) {ThisActor->HighLightActor();}
+		HighHlightActor(ThisActor);
+		UnHighHlightActor(LastActor);
+	}
+}
+
+void AAuraPlayerController::HighHlightActor(AActor* InActor)
+{
+	if(IsValid(InActor) && InActor->Implements<UHighLightInterface>())
+	{
+		IHighLightInterface::Execute_HighLightActor(InActor);
+	}
+}
+
+void AAuraPlayerController::UnHighHlightActor(AActor* InActor)
+{
+	if(IsValid(InActor) && InActor->Implements<UHighLightInterface>())
+	{
+		IHighLightInterface::Execute_UnHighLightActor(InActor);
 	}
 }
 
@@ -176,7 +200,14 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)/*按�
 	//GEngine->AddOnScreenDebugMessage(1,2,FColor::Red,*InputTag.ToString());
 	if (InputTag.MatchesTagExact(FMyGameplayTags::Get().InputTag_LMB))
 	{
-	    bTargeting = ThisActor != nullptr;
+		if (IsValid(ThisActor))
+		{
+			TargetingStatus = ThisActor->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
+		}
+		else
+		{
+			TargetingStatus = ETargetingStatus::NotTargeting;
+		}
 		bAutoRunning = false;
 		FollowTime = 0.f;
 	}
@@ -200,11 +231,22 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)/*释�
 		return;
 	}
 	if (GetASC()) GetASC()->AbilityAssetTagReleased(InputTag);
-	if (!bTargeting && !bShiftKeyDown)
+	if (TargetingStatus != ETargetingStatus::TargetingEnemy && !bShiftKeyDown)
 	{
 		const APawn* ControllerPawn = GetPawn();
 			if (FollowTime <= shortpressThreshold && ControllerPawn)
 			{
+
+				/*当点击的是检查点时把目标位置设置成检查点*/
+				if (IsValid(ThisActor) && ThisActor->Implements<UHighLightInterface>())
+				{
+					IHighLightInterface::Execute_SetMoveToLocation(ThisActor,CachedDestination);
+				}
+				else
+				{
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ClickNiagaraComponent,CachedDestination);
+				}
+				
 				/*虚幻引擎内置自动寻路避障插件，返回路径*/
 				if (UNavigationPath* NavPat = UNavigationSystemV1::FindPathToLocationSynchronously(this,ControllerPawn->GetActorLocation(),CachedDestination))
 				{
@@ -220,7 +262,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)/*释�
 						bAutoRunning = true;
 					}
         				FollowTime = 0.f;
-        				bTargeting = false;
+						TargetingStatus = ETargetingStatus::NotTargeting;
 				}
 				if (GetASC() && !GetASC()->HasMatchingGameplayTag(FMyGameplayTags::Get().Player_Block_CursorTrace))
 				{
@@ -245,7 +287,7 @@ void AAuraPlayerController::AbilityInputTagHold(FGameplayTag InputTag)/*长按*/
 		if (GetASC()) GetASC()->AbilityInputTagHold(InputTag);
 		return;
 	}
-	if (bTargeting || bShiftKeyDown)
+	if (TargetingStatus == ETargetingStatus::TargetingEnemy || bShiftKeyDown)
 	{
 		if (GetASC()) GetASC()->AbilityInputTagHold(InputTag);
 	

@@ -19,6 +19,7 @@
 #include "Gas/FunctionLibrary/MyFunctionLibrary.h"
 #include "Gas/Player/AbilitySystemComponent/AuraAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
+#include "SaveGame/AuraGameInstance.h"
 #include "Tags/AuraGameplayTags.h"
 
 AAuraCharacter::AAuraCharacter()
@@ -78,9 +79,15 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 		/*获取存档*/
 		ULoadScreenSaveGame* SaveGame = AuraGameModeBase->RetrieveInGameSaveData();
 		if (SaveGame == nullptr) return;
+
+		UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+		check(AuraGameInstance);
 		
 		/*更新并保存出生点标签*/
 		SaveGame->PlayerStartTag = CheckPointTag;
+
+		/*切换地图时设置默认出生点标签*/
+		AuraGameInstance->PlayerStartTag = CheckPointTag;
 
 		/*更新并保存玩家状态*/
 		if (AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(GetPlayerState()))
@@ -137,7 +144,6 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 		
 		/*保存数据*/
 		AuraGameModeBase->SaveGameProgress(SaveGame);
-		UE_LOG(LogAura, Warning, TEXT("1技能 %d 数量"), SaveGame->SaveAbilities.Num());
 		
 	}
 }
@@ -371,6 +377,26 @@ int32 AAuraCharacter::GetPlayerLevel_Implementation()
 	check(AuraPlayerState);
 	return AuraPlayerState->GetPlayerLevel();
 	
+}
+
+void AAuraCharacter::Die(const FVector& DeathImpulse)
+{
+	Super::Die(DeathImpulse);
+	//创建一个委托，用于绑定委托回调
+	FTimerDelegate DeathTimerDelegate;
+	DeathTimerDelegate.BindLambda([this]()
+	{
+		if(const AAuraGameModeBase* RPGGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
+		{
+			RPGGameMode->PlayerDied(this);
+		}
+	});
+
+	//通过定时器触发对应的委托广播
+	GetWorldTimerManager().SetTimer(DeathTimer, DeathTimerDelegate, DeathTime, false);
+
+	//防止相机在玩家角色死亡后跟随移动，将相机固定在世界坐标位置
+	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 

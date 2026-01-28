@@ -637,3 +637,13 @@ void UMyFunctionLibrary::SetEffectParamsTargetASC(FDamageEffectPrams& DamageEffe
 	DamageEffectParams.TargetAbilitySystemComponent = InASC;
 }
 
+ULootTiers* UMyFunctionLibrary::GetLootTiers(const UObject* WorldContextObject)
+{
+	//获取到当前关卡的GameMode实例
+	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if(GameMode == nullptr) return nullptr;
+
+	//返回敌人战利品配置，需要设置到GameMode上
+	return  GameMode->LootTiers;
+}
+

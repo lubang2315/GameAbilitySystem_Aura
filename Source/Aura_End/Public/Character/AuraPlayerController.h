@@ -7,7 +7,9 @@
 #include "Components/SplineComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Input/AuraInputConfig.h"
+#include "Interface/HighLightInterface.h"
 #include "AuraPlayerController.generated.h"
+
 
 
 class AMagicCircle;
@@ -16,8 +18,21 @@ class UDamageTextComponent;
 class UAuraAbilitySystemComponent;
 class UInputAction;
 class UInputMappingContext;
-class IEnemyInterface;
 struct FInputActionValue;
+
+
+/*鼠标拾取目标的类型分类枚举*/
+enum class ETargetingStatus : uint8
+{
+	/*敌人*/
+	TargetingEnemy,
+	/*非敌人*/
+	TargetingNonEnemy,
+	/*无*/
+	NotTargeting
+	
+};
+
 /**
  * 
  */
@@ -71,8 +86,11 @@ private:
 	void Move(const struct FInputActionValue& InputActionValue);
 
 	void CursorTrace();
-	TScriptInterface<IEnemyInterface> LastActor;
-	TScriptInterface<IEnemyInterface> ThisActor;
+	TObjectPtr<AActor> LastActor;
+	TObjectPtr<AActor> ThisActor;
+	FHitResult HitResult;
+	void HighHlightActor(AActor* InActor);
+	void UnHighHlightActor(AActor* InActor);
 	
 	/**回调函数，根据状态触发GA *ActivateGA**MouseMove*/
 	void AbilityInputTagPressed(FGameplayTag InputTag);
@@ -93,7 +111,7 @@ private:
 	FVector CachedDestination = FVector::ZeroVector;
 	float FollowTime = 0.f;
 	bool bAutoRunning = false;
-	bool bTargeting = false;
+	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
 
 	UPROPERTY(EditDefaultsOnly)
 	float shortpressThreshold = 0.3f;
@@ -105,8 +123,7 @@ private:
 	TObjectPtr<USplineComponent> Spline;
 
 	void AutoMove();
-
-	FHitResult HitResult;
+	
 	/*End*/
 
 	/*鼠标点击移动特效*/

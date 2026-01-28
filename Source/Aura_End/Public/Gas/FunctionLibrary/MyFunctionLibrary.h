@@ -7,6 +7,7 @@
 #include "GameplayEffectTypes.h"
 #include "Gas/DataAsset/AbilityInfo.h"
 #include "Gas/DataAsset/CharacterClassInfo.h"
+#include "Gas/DataAsset/LootTiers.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "SaveGame/LoadScreenSaveGame.h"
 #include "MyFunctionLibrary.generated.h"
@@ -202,6 +203,10 @@ public:
 	static void SetEffectParamsTargetASC(UPARAM(ref) FDamageEffectPrams& DamageEffectParams, UAbilitySystemComponent* InASC);
 
 	/*End*/
+
+	/*返回生成战利品信息的数据资产，此数据配置到gameMode上了*/
+	UFUNCTION(BlueprintCallable, Category="RPGAbilitySystemLibrary|CharacterClassDefaults", meta=(DefaultToSelf = "WorldContextObject"))
+	static ULootTiers* GetLootTiers(const UObject* WorldContextObject);
 };
 
 

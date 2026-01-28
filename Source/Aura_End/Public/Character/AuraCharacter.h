@@ -77,8 +77,17 @@ public:
 
 private:
 	virtual void InitAbilityActorInfo() override;
-
+	/*ICombotInterface*/
 	virtual int32 GetPlayerLevel_Implementation() override;
+	virtual void Die(const FVector& DeathImpulse) override;
+	/*EndCombotInterface*/
+
+	/*角色死亡后持续时间，用于表现角色死亡*/
+	UPROPERTY(EditDefaultsOnly)
+	float DeathTime = 5.f;
+
+	/*声明一个计时器，用于角色死亡后一定时间处理后续逻辑*/
+	FTimerHandle DeathTimer;
 
 	/*在升级后播放升级特效，在每个客户端都调用这个函数*/
 	UFUNCTION(NetMulticast,Reliable)

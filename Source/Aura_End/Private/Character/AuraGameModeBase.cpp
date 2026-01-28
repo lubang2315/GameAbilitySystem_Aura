@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "SaveGame/AuraGameInstance.h"
 #include "SaveGame/LoadScreenSaveGame.h"
+#include "GameFramework/Character.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "UI/MVVM/MVVM_LoadSlot.h"
 
@@ -29,6 +30,7 @@ void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlot, int32 SlotI
 	LoadScreenSaveGame->SlotStatus = Taken;
 	LoadScreenSaveGame->LoadMap = LoadSlot->GetLoadMap();
 	LoadScreenSaveGame->PlayerStartTag = LoadSlot->PlayerStartTag;
+	LoadScreenSaveGame->MapAssetName = LoadSlot->MapAssetName;
 
 	/*设置完数据后存档*/
 	UGameplayStatics::SaveGameToSlot(LoadScreenSaveGame,LoadSlot->GetLoadSlotName(),SlotIndex);
@@ -66,6 +68,18 @@ void AAuraGameModeBase::DelegateSlotData(const FString& SaveSlotName, int32 Slot
 		/*删除已经存在的存档*/
 		UGameplayStatics::DeleteGameInSlot(SaveSlotName,SlotIndex);
 	}
+}
+
+FString AAuraGameModeBase::GatMapNameFromMapAssetName(const FString& MapAssetName) const
+{
+	for (auto& Map : Maps)
+	{
+		if (Map.Value.ToSoftObjectPath().GetAssetName() == MapAssetName)
+		{
+			return Map.Key;
+		}
+	}
+	return FString();
 }
 
 void AAuraGameModeBase::TravelToMap(UMVVM_LoadSlot* Slot)
@@ -133,7 +147,7 @@ void AAuraGameModeBase::SaveGameProgress(ULoadScreenSaveGame* SaveGameData) cons
 	UGameplayStatics::SaveGameToSlot(SaveGameData,SlotName,SlotIndex);
 }
 
-void AAuraGameModeBase::SaveWorldState(UWorld* World) const
+void AAuraGameModeBase::SaveWorldState(UWorld* World,const FString& DestinationMapAssetName) const
 {
 	//获取关卡名称
 	FString WorldName = World->GetMapName();
@@ -146,6 +160,13 @@ void AAuraGameModeBase::SaveWorldState(UWorld* World) const
 	//获取存档
 	if(ULoadScreenSaveGame* SaveGame = GetLoadScreenSaveGame(RPGGI->LoadSlotName, RPGGI->LoadSlotIndex))
 	{
+		/*修改地图存档名称个和地图资源名称*/
+		if (DestinationMapAssetName != FString(""))
+		{
+			SaveGame->MapAssetName = DestinationMapAssetName;
+			SaveGame->LoadMap = GatMapNameFromMapAssetName(DestinationMapAssetName);
+		}
+		
 		if(!SaveGame->HasMap(WorldName))
 		{
 			//如果存档不包含对应关卡内容，将创建一个对应的数据结构体存储
@@ -255,6 +276,16 @@ void AAuraGameModeBase::LoadWorldState(UWorld* World) const
 			}			
 		}
 	}
+}
+
+void AAuraGameModeBase::PlayerDied(const ACharacter* DeadCharater) const
+{
+	//获取存档数据
+	const ULoadScreenSaveGame* SaveGame = RetrieveInGameSaveData();
+	if(!IsValid(SaveGame)) return;
+
+	//通过地图命名打开地图
+	UGameplayStatics::OpenLevelBySoftObjectPtr(DeadCharater, Maps.FindChecked(SaveGame->MapAssetName));
 }
 
 void AAuraGameModeBase::BeginPlay()
